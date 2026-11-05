@@ -78,3 +78,4 @@ def get_system_health(db: Session = Depends(get_db)):
             "services": {k: v.model_dump() for k, v in services.items()}
         }
     )
+

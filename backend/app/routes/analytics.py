@@ -11,3 +11,4 @@ router = APIRouter(prefix="/analytics", tags=["Analytics"])
 def get_analytics_summary(db: Session = Depends(get_db)):
     """Returns analytics computed strictly from real database records."""
     return analytics_service.get_summary(db)
+

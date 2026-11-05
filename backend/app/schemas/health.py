@@ -12,3 +12,4 @@ class HealthResponse(BaseModel):
     status: str = Field(..., description="Overall platform status: 'ok', 'degraded', or 'error'")
     version: str = Field(default="1.0.0", description="API version")
     services: Dict[str, ServiceStatus] = Field(..., description="Individual dependency health states")
+

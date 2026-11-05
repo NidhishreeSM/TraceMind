@@ -121,3 +121,4 @@ def test_analytics_metrics_empty_db(memory_db):
     assert summary.memory_impact.time_saved_percentage == 0.0
     assert summary.memory_impact.recall_hit_rate == 0.0
     assert summary.memory_impact.feedback_accept_rate == 0.0
+

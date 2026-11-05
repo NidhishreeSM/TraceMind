@@ -206,3 +206,4 @@ def add_incident_feedback(incident_id: str, payload: FeedbackCreate, db: Session
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to record feedback: {str(e)}"
         )
+

@@ -19,3 +19,4 @@ class MemoryRecallResponse(BaseModel):
         description="Exact memory units returned from Hindsight"
     )
     total: int
+

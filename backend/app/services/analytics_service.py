@@ -106,3 +106,4 @@ class AnalyticsService:
 
 
 analytics_service = AnalyticsService()
+

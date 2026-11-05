@@ -136,3 +136,4 @@ def root_info():
         "docs": "/docs",
         "health": "/api/health"
     }
+

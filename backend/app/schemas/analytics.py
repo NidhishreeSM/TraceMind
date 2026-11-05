@@ -32,3 +32,4 @@ class AnalyticsSummaryResponse(BaseModel):
     memory_impact: MemoryImpactMetrics
     severity_breakdown: Dict[str, int] = Field(default_factory=dict)
     service_breakdown: Dict[str, int] = Field(default_factory=dict)
+

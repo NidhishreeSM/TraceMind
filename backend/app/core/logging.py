@@ -42,3 +42,4 @@ def setup_logger(name: str = "tracemind", level: str = "INFO") -> logging.Logger
 
 
 logger = setup_logger()
+

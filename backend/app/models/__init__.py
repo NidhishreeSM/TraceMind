@@ -7,3 +7,4 @@ __all__ = [
     "Base", "engine", "SessionLocal", "init_db", "get_db",
     "Incident", "Analysis", "Resolution", "Feedback"
 ]
+
