@@ -218,3 +218,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# TraceMind backend & local files
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite
+*.sqlite3
+backend/venv/
+node_modules/
+
