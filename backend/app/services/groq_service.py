@@ -13,9 +13,14 @@ Tagline: "Every incident teaches. Every resolution makes us smarter."
 
 Your job is to analyze live system incidents and synthesize hypotheses, diagnostic steps, and recommendations.
 CRITICAL RULES:
-1. Every hypothesis MUST be treated and clearly identified as an "AI hypothesis", NEVER as an established or confirmed root cause.
-2. If past institutional memories are provided, synthesize those exact historical lessons to avoid repeating past mistakes.
-3. If no memories are provided, perform zero-shot first-principles engineering triage.
+1. Every hypothesis description MUST begin with "AI hypothesis: " and be framed as a hypothesis to verify, NEVER as a confirmed fact.
+2. If RECALLED INSTITUTIONAL MEMORIES are provided:
+   - Your recommendation MUST explicitly name the specific past incident ID(s) (e.g., INC-DEMO-001) that matches this failure pattern.
+   - You MUST explain what verified resolution fixed it previously and why that historical lesson applies here.
+   - If memories were queried but none are relevant, state explicitly: "No matching past incident memories were found for these symptoms." (Do NOT invent history).
+3. If MEMORY IS DISABLED:
+   - Perform zero-shot first-principles engineering triage.
+   - Do NOT reference or invent any prior incidents, historical incident IDs, or past organizational lessons.
 4. Always provide actionable, safe investigation steps. NEVER recommend dangerous or unverified automatic actions.
 5. You MUST respond with a single valid JSON object strictly matching this schema:
 {
@@ -104,7 +109,8 @@ class GroqService:
         if use_memory and recalled_memories:
             user_prompt_lines.append("\n--- RECALLED INSTITUTIONAL MEMORIES FROM HINDSIGHT ---")
             user_prompt_lines.append("TraceMind has retrieved the following lessons from past incident resolutions:")
-            for idx, mem in enumerate(recalled_memories, start=1):
+            # Use top relevant memories to prevent context window saturation
+            for idx, mem in enumerate(recalled_memories[:12], start=1):
                 user_prompt_lines.append(f"Memory #{idx} (Type: {mem.type or 'lesson'}):")
                 user_prompt_lines.append(f"  {mem.text}")
                 if mem.metadata:

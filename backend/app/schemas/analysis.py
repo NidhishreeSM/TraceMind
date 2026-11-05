@@ -15,6 +15,7 @@ class RecalledMemoryItem(BaseModel):
     type: Optional[str] = Field(default=None, description="Memory type: experience, world, or observation")
     metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata tags attached to the memory")
     score: Optional[float] = Field(default=None, description="Relevance score from multi-strategy retrieval")
+    scores: Optional[Dict[str, Any]] = Field(default=None, description="Detailed scoring breakdown")
 
 
 class AnalyzeRequest(BaseModel):

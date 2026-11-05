@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
     # Security & CORS
     FRONTEND_ORIGIN: str = Field(
-        default="http://localhost:3000",
+        default="http://localhost:5173",
         description="Allowed origin for CORS from React frontend"
     )
 

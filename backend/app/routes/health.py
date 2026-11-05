@@ -4,7 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from backend.app.core.config import settings
 from backend.app.core.logging import logger
-from backend.app.models.database import get_db
+from backend.app.models.database import get_db, _is_sqlite_fallback
 from backend.app.schemas.health import HealthResponse, ServiceStatus
 from backend.app.services.hindsight_service import hindsight_service
 
@@ -20,11 +20,14 @@ def get_system_health(db: Session = Depends(get_db)):
     # 1. Database Health Check
     try:
         db.execute(text("SELECT 1"))
-        engine_type = "sqlite" if settings.is_sqlite() else "postgresql"
+        dialect = db.bind.dialect.name
+        msg = "Connected to PostgreSQL" if dialect == "postgresql" else (
+            "Connected to SQLite (Docker/PostgreSQL unavailable fallback)" if _is_sqlite_fallback else "Connected to SQLite"
+        )
         services["database"] = ServiceStatus(
             status="healthy",
-            message="Database connection established",
-            details={"engine": engine_type}
+            message=msg,
+            details={"engine": dialect, "fallback_to_sqlite": _is_sqlite_fallback}
         )
     except Exception as e:
         logger.error(f"Database health check failed: {e}")

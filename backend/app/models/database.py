@@ -2,25 +2,42 @@ from datetime import datetime, timezone
 import json
 from typing import Generator, List, Optional
 from sqlalchemy import (
-    Boolean, Column, DateTime, ForeignKey, Integer, String, Text, create_engine
+    Boolean, Column, DateTime, ForeignKey, Integer, String, Text, create_engine, text as sql_text
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker, Session
 from backend.app.core.config import settings
 from backend.app.core.logging import logger
 
-# Create engine
-connect_args = {}
-if settings.is_sqlite():
-    connect_args["check_same_thread"] = False
+# Create engine with transparent fallback if Docker/Postgres is unavailable
+def _build_engine():
+    url = settings.DATABASE_URL
+    if not settings.is_sqlite():
+        try:
+            # Test PostgreSQL connectivity with quick timeout
+            test_engine = create_engine(
+                url,
+                pool_pre_ping=True,
+                connect_args={"connect_timeout": 3}
+            )
+            with test_engine.connect() as conn:
+                conn.execute(sql_text("SELECT 1"))
+            logger.info("Connected to PostgreSQL successfully.")
+            return test_engine, False
+        except Exception as e:
+            logger.warning(
+                f"PostgreSQL connection failed ({e}). "
+                "Docker is unavailable. Falling back to SQLite: sqlite:///./tracemind.db"
+            )
 
-engine = create_engine(
-    settings.DATABASE_URL,
-    connect_args=connect_args,
-    pool_pre_ping=True
-)
+    # Fallback SQLite
+    connect_args = {"check_same_thread": False}
+    return create_engine("sqlite:///./tracemind.db", connect_args=connect_args), True
 
+
+engine, _is_sqlite_fallback = _build_engine()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
 
 
 def get_utc_now():

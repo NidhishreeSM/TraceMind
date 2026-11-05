@@ -126,6 +126,7 @@ def run_smoke_test():
     print("\n" + "=" * 80)
     print(" SMOKE TEST COMPLETE ")
     print("=" * 80)
+    hindsight_service.close()
 
 
 if __name__ == "__main__":

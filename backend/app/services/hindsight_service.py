@@ -1,3 +1,5 @@
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 import time
 from typing import Any, Dict, List, Optional
 import hindsight_client
@@ -214,6 +216,25 @@ class HindsightService:
             "operation_id": op_id
         }
 
+    def _execute(self, coro_fn):
+        """Executes a coroutine inside a fresh Task context to avoid Python 3.11+ timeout errors."""
+        def run_coro():
+            async def runner():
+                task = asyncio.create_task(coro_fn())
+                return await task
+            return asyncio.run(runner())
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop and loop.is_running():
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                return executor.submit(run_coro).result()
+        else:
+            return run_coro()
+
     def recall(
         self,
         query: str,
@@ -229,23 +250,44 @@ class HindsightService:
         client = self._get_client()
 
         try:
-            response = client.recall(
-                bank_id=self.bank_id,
-                query=query,
-                types=types,
-                budget=budget,
-                max_tokens=max_tokens
+            response = self._execute(
+                lambda: client.arecall(
+                    bank_id=self.bank_id,
+                    query=query,
+                    types=types,
+                    budget=budget,
+                    max_tokens=max_tokens
+                )
             )
 
             results: List[RecalledMemoryItem] = []
             for item in getattr(response, "results", []):
+                raw_scores = getattr(item, "scores", None)
+                final_score = None
+                scores_dict = None
+                if raw_scores is not None:
+                    if hasattr(raw_scores, "final"):
+                        final_score = getattr(raw_scores, "final", None)
+                        scores_dict = {
+                            "final": getattr(raw_scores, "final", None),
+                            "semantic": getattr(raw_scores, "semantic", None),
+                            "keyword": getattr(raw_scores, "keyword", None),
+                            "reranker": getattr(raw_scores, "reranker", None),
+                        }
+                    elif isinstance(raw_scores, dict):
+                        final_score = raw_scores.get("final")
+                        scores_dict = raw_scores
+                    elif isinstance(raw_scores, (int, float)):
+                        final_score = float(raw_scores)
+
                 results.append(
                     RecalledMemoryItem(
                         id=getattr(item, "id", None),
                         text=getattr(item, "text", ""),
                         type=getattr(item, "type", None),
                         metadata=getattr(item, "metadata", None),
-                        score=getattr(item, "scores", None)
+                        score=final_score,
+                        scores=scores_dict
                     )
                 )
             return results

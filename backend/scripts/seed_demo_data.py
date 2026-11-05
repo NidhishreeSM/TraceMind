@@ -727,6 +727,8 @@ def seed_demo_data():
     seeded_incidents = 0
     seeded_resolutions = 0
     retained_in_hindsight = 0
+    already_retained = 0
+    failures = []
 
     try:
         for data in DEMO_INCIDENTS:
@@ -792,78 +794,73 @@ def seed_demo_data():
 
                 db.commit()
 
-                # 3. Retain in real Hindsight if configured
-                if hindsight_active and not res.retained_in_hindsight:
-                    try:
-                        print(f"  -> Retaining post-mortem for {inc_id} in Hindsight...")
-                        retain_res = hindsight_service.retain_incident(
-                            incident_id=inc_id,
-                            title=data["title"],
-                            service=data["service"],
-                            environment=data["environment"],
-                            symptoms=data["symptoms"],
-                            confirmed_cause=data["confirmed_cause"],
-                            verified_resolution=data["verified_resolution"],
-                            steps_taken=data["steps_taken"],
-                            error_logs=data["error_logs"],
-                            failed_attempts=data["failed_attempts"],
-                            outcome=data.get("outcome"),
-                            is_demo=True
-                        )
-                        res.retained_in_hindsight = True
-                        res.hindsight_document_id = inc_id
-                        db.commit()
-                        retained_in_hindsight += 1
-                    except Exception as e:
-                        print(f"     [!] Failed to retain {inc_id}: {e}")
-
-                # 4. Add realistic synthetic Analysis & Feedback for MTTR metric calculation
-                existing_analysis = db.query(Analysis).filter(Analysis.incident_id == inc_id).first()
-                if not existing_analysis:
-                    # Give ~70% of resolved incidents a memory analysis to show MTTR contrast
-                    use_mem = (hash(inc_id) % 3 != 0)
-                    synth_analysis = Analysis(
-                        incident_id=inc_id,
-                        use_memory=use_mem,
-                        model_used="openai/gpt-oss-120b",
-                        latency_ms=1150 if use_mem else 850,
-                        hypotheses_json=json.dumps([{
-                            "description": f"AI hypothesis: {data['confirmed_cause']}",
-                            "confidence": "high" if use_mem else "medium",
-                            "rationale": "Pattern matched historical incident memory" if use_mem else "First-principles deduction"
-                        }]),
-                        investigation_steps_json=json.dumps(data["steps_taken"][:2]),
-                        recommendation=data["verified_resolution"],
-                        uncertainty_note="AI hypothesis based on historical pattern recognition",
-                        recalled_memories_json=json.dumps([{
-                            "text": f"Prior incident lesson: {data['verified_resolution']}",
-                            "id": f"mem_{inc_id}"
-                        }]) if use_mem else "[]",
-                        created_at=created_at + timedelta(minutes=2)
-                    )
-                    db.add(synth_analysis)
-                    db.commit()
-
-                    # Add feedback
-                    synth_feedback = Feedback(
-                        incident_id=inc_id,
-                        analysis_id=synth_analysis.id,
-                        feedback_type="accept" if use_mem else "modify",
-                        notes="AI recommendation accurately pinpointed the root cause" if use_mem else "Had to adjust investigation steps",
-                        created_at=created_at + timedelta(minutes=5)
-                    )
-                    db.add(synth_feedback)
-                    db.commit()
+                # 3. Retain in real Hindsight if configured & not yet retained
+                if hindsight_active:
+                    if res.retained_in_hindsight:
+                        already_retained += 1
+                    else:
+                        try:
+                            print(f"  -> Retaining real post-mortem for {inc_id} in Hindsight...")
+                            retain_res = hindsight_service.retain_incident(
+                                incident_id=inc_id,
+                                title=data["title"],
+                                service=data["service"],
+                                environment=data["environment"],
+                                symptoms=data["symptoms"],
+                                confirmed_cause=data["confirmed_cause"],
+                                verified_resolution=data["verified_resolution"],
+                                steps_taken=data["steps_taken"],
+                                error_logs=data["error_logs"],
+                                failed_attempts=data["failed_attempts"],
+                                outcome=data.get("outcome"),
+                                is_demo=True
+                            )
+                            res.retained_in_hindsight = True
+                            res.hindsight_document_id = inc_id
+                            db.commit()
+                            retained_in_hindsight += 1
+                        except Exception as e:
+                            err_msg = str(e)
+                            print(f"     [!] Failed to retain {inc_id}: {err_msg}")
+                            failures.append({"incident_id": inc_id, "error": err_msg})
 
         print("\n" + "=" * 80)
-        print(" SEEDING SUMMARY ")
+        print(" SEEDING & BACKFILL SUMMARY ")
         print("=" * 80)
         print(f"Total Incidents in Database:      {db.query(Incident).count()}")
         print(f"Total Resolutions in Database:    {db.query(Resolution).count()}")
-        print(f"Total Analyses in Database:       {db.query(Analysis).count()}")
-        print(f"Total Feedbacks in Database:      {db.query(Feedback).count()}")
-        print(f"Post-mortems Retained Hindsight:  {retained_in_hindsight}")
-        print("Database seeding completed successfully.")
+        print(f"Newly Retained in Hindsight:      {retained_in_hindsight}")
+        print(f"Already Retained in Hindsight:    {already_retained}")
+        print(f"Retention Failures:               {len(failures)}")
+
+        if failures:
+            print("\n[!] List of Retention Failures:")
+            for f in failures:
+                print(f"    - {f['incident_id']}: {f['error']}")
+            raise RuntimeError(f"Hindsight retention encountered {len(failures)} failures.")
+
+        # 4. Verify with Real Recall Queries
+        if hindsight_active:
+            print("\n" + "=" * 80)
+            print(" VERIFYING REAL RETRIEVAL FROM HINDSIGHT ")
+            print("=" * 80)
+            verify_queries = [
+                ("Pattern 1 (DB Pools)", "database connection pool exhausted leaked session context"),
+                ("Pattern 2 (JWT & Auth)", "JWKS public key rotation clock skew 401 unauthorized"),
+                ("Pattern 3 (Kafka)", "Kafka consumer rebalance storm max.poll.interval.ms exceeded")
+            ]
+            for label, query in verify_queries:
+                print(f"\n--- Testing Recall: {label} ---")
+                print(f"Query: '{query}'")
+                recalled = hindsight_service.recall(query=query, budget="mid", max_tokens=2048)
+                print(f"Returned {len(recalled)} real memories:")
+                for i, r in enumerate(recalled[:2], start=1):
+                    print(f"  [{i}] ID: {r.id} | Score: {r.score} | Type: {r.type}")
+                    print(f"      Text: {r.text[:140]}...")
+                    if r.metadata:
+                        print(f"      Metadata: {json.dumps(r.metadata)}")
+
+        print("\nDatabase seeding and Hindsight backfill completed successfully.")
 
     finally:
         db.close()

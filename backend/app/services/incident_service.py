@@ -107,7 +107,7 @@ class IncidentService:
                 recalled_memories = hindsight_service.recall(
                     query=recall_query,
                     budget="mid",
-                    max_tokens=4096
+                    max_tokens=2048
                 )
                 logger.info(f"Hindsight recall returned {len(recalled_memories)} items for incident {incident_id}")
             except Exception as e:

@@ -8,7 +8,7 @@
 ## 1. Architecture & Stack
 
 - **Framework**: Python 3.11+ / FastAPI
-- **Database**: PostgreSQL (via Docker Compose) with transparent SQLite fallback via `DATABASE_URL`
+- **Database**: PostgreSQL (via Docker Compose) with automatic transparent SQLite fallback (`sqlite:///./tracemind.db`) when Docker/Postgres is unavailable
 - **ORM**: SQLAlchemy 2 (Alembic-free clean `create_all`)
 - **Agent Memory**: Official Vectorize `hindsight-client` (multi-strategy retrieval + background observation extraction)
 - **AI Inference**: Official `groq` Python SDK (Primary: `openai/gpt-oss-120b`, Fallback: `qwen/qwen3-32b`)
@@ -36,7 +36,7 @@ backend/
 │   │   ├── resolution.py        # Resolution schemas
 │   │   ├── feedback.py          # Engineer feedback schemas (accept/reject/modify)
 │   │   ├── memory.py            # Memory Explorer recall passthrough schemas
-│   │   ├── analytics.py         # Real derived metrics schema
+│   │   ├── analytics.py         # Real derived metrics schema (live vs demo separated)
 │   │   ├── health.py            # Health status schema
 │   │   └── error.py             # Standard error envelope
 │   ├── routes/
@@ -62,45 +62,61 @@ backend/
 
 ---
 
-## 3. Environment Variables & Configuration
+## 3. Required Environment Variables
 
 Copy `.env.example` to `.env` in the repository root:
 ```bash
 cp .env.example .env
 ```
 
-| Variable | Description | Default / Example |
+| Variable | Description | Recommended / Active Value |
 |---|---|---|
 | `DATABASE_URL` | PostgreSQL connection or SQLite fallback | `postgresql://tracemind:tracemind_password@localhost:5432/tracemind` or `sqlite:///./tracemind.db` |
 | `HINDSIGHT_BASE_URL` | Hindsight server endpoint | `https://api.hindsight.vectorize.io` |
-| `HINDSIGHT_API_KEY` | Vectorize / Hindsight API key | `your_hindsight_api_key_here` |
-| `HINDSIGHT_BANK_ID` | Isolated memory bank identifier | `tracemind-production` |
-| `GROQ_API_KEY` | Groq LLM API Key | `your_groq_api_key_here` |
+| `HINDSIGHT_API_KEY` | Vectorize / Hindsight API key | Set in `.env` |
+| `HINDSIGHT_BANK_ID` | Isolated memory bank identifier | `TraceMind` |
+| `GROQ_API_KEY` | Groq LLM API Key | Set in `.env` |
 | `GROQ_MODEL` | Primary LLM for incident analysis | `openai/gpt-oss-120b` |
 | `GROQ_FALLBACK_MODEL`| Fallback LLM if primary is rate limited | `qwen/qwen3-32b` |
-| `FRONTEND_ORIGIN` | React frontend allowed origin for CORS | `http://localhost:3000` |
+| `FRONTEND_ORIGIN` | React frontend allowed origin for CORS | `http://localhost:5173` |
 | `HOST` | Backend bind host | `0.0.0.0` |
 | `PORT` | Backend bind port | `8000` |
 
 ---
 
-## 4. Setup & Running
+## 4. Run Order (Setup to Server)
 
-### 4.1 Local Virtual Environment
+Follow this exact sequence to bootstrap and verify the platform:
+
+### Step 1: Install Dependencies
 ```bash
 python3 -m venv backend/venv
 source backend/venv/bin/activate
 pip install -r backend/requirements.txt
 ```
 
-### 4.2 Database (PostgreSQL via Docker Compose)
-If Docker is installed:
+### Step 2: Run Hindsight Smoke Test
+Validates connection, retain, and recall operations against the real Hindsight memory service:
 ```bash
-docker compose up -d postgres
+source backend/venv/bin/activate
+python3 backend/scripts/hindsight_smoke_test.py
 ```
-If Docker is unavailable, the backend automatically uses `sqlite:///./tracemind.db`.
 
-### 4.3 Running the Backend Server
+### Step 3: Seed Database & Backfill Hindsight Memory
+Populates 30 synthetic past incidents across 6 services with 3 recurring failure patterns, and retains all resolved post-mortems in Hindsight:
+```bash
+source backend/venv/bin/activate
+python3 backend/scripts/seed_demo_data.py
+```
+
+### Step 4: Run Tests
+Executes unit tests for pure business logic:
+```bash
+source backend/venv/bin/activate
+pytest
+```
+
+### Step 5: Start Backend API Server
 ```bash
 source backend/venv/bin/activate
 uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -109,31 +125,16 @@ Interactive API docs are available at `http://localhost:8000/docs`.
 
 ---
 
-## 5. Scripts
+## 5. Demo Data & Analytics Disclosures
 
-### 5.1 Real Hindsight Smoke Test
-Executes a live test against the real Hindsight memory service:
-1. Retains sample incident `INC-DEMO-001` (Payment API, Production; connection pool exhaustion).
-2. Recalls with semantically altered query: *"Payment requests are failing because database connections remain unavailable. Have we seen a similar service issue, and what fixed it?"*
-3. Prints the authentic memory response and metadata.
-
-```bash
-source backend/venv/bin/activate
-python3 backend/scripts/hindsight_smoke_test.py
-```
-
-### 5.2 Seed Demo Data
-Populates 30 realistic synthetic past incidents across 6 services with 3 recurring failure patterns:
-```bash
-source backend/venv/bin/activate
-python3 backend/scripts/seed_demo_data.py
-```
-
-### 5.3 Run Tests
-```bash
-source backend/venv/bin/activate
-pytest
-```
+- **Synthetic Seed Data**: The 30 demo incidents generated by `seed_demo_data.py` are labeled with `is_demo=true`. They provide a realistic baseline spanning:
+  1. *Database connection pool starvation* (`payment-api`, `orders-db`)
+  2. *JWT signing key cache desync and clock skew* (`auth-service`, `k8s-ingress`)
+  3. *Kafka consumer rebalance storms from processing timeouts* (`kafka-consumer`)
+- **Truthful Analytics**: `/api/analytics/summary` strictly derives metrics from real database rows. It explicitly segregates live production runs from demo benchmark figures:
+  - `recall_hit_rate` is computed only from actual `POST /api/incidents/{id}/analyze` calls where `use_memory=true`.
+  - `time_saved_percentage` returns `null` unless sufficient live resolved incidents exist for both memory-augmented and baseline runs.
+  - Sample incident metrics are nested under `demo_benchmark` with `"basis": "seeded_sample"` so historical reference data is never confused for live telemetry.
 
 ---
 
@@ -165,7 +166,7 @@ curl -X POST http://localhost:8000/api/incidents \
 
 ### 6.4 Get Incident Details (Including Analyses & Resolution)
 ```bash
-curl -X GET http://localhost:8000/api/incidents/INC-DEMO-001
+curl -X GET http://localhost:8000/api/incidents/INC-DEMO-026
 ```
 
 ### 6.5 Analyze Incident (WITH Hindsight Memory - Core Demo)
@@ -188,7 +189,7 @@ curl -X POST http://localhost:8000/api/incidents/INC-DEMO-026/analyze \
 
 ### 6.7 Resolve Incident & Retain Post-Mortem in Hindsight
 ```bash
-curl -X POST http://localhost:8000/api/incidents/INC-DEMO-026/resolve \
+curl -X POST http://localhost:8000/api/incidents/INC-001/resolve \
   -H "Content-Type: application/json" \
   -d '{
     "confirmed_cause": "Unhandled DB transaction rollback bypassed connection release in checkout webhook",
@@ -231,4 +232,3 @@ curl -X POST http://localhost:8000/api/memory/recall \
 ```bash
 curl -X GET http://localhost:8000/api/analytics/summary
 ```
-

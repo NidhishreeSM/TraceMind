@@ -110,15 +110,18 @@ def test_groq_json_cleaner_with_commentary():
 
 
 def test_analytics_metrics_empty_db(memory_db):
-    """Verifies that analytics returns exact zeros when database has zero records, never fabricated data."""
+    """Verifies that analytics returns None/zeros without fabrication when database has zero live records."""
     service = AnalyticsService()
     summary = service.get_summary(memory_db)
     assert summary.total_incidents == 0
     assert summary.open_incidents == 0
     assert summary.resolved_incidents == 0
-    assert summary.memory_impact.avg_minutes_to_resolve_with_memory == 0.0
-    assert summary.memory_impact.avg_minutes_to_resolve_without_memory == 0.0
-    assert summary.memory_impact.time_saved_percentage == 0.0
-    assert summary.memory_impact.recall_hit_rate == 0.0
-    assert summary.memory_impact.feedback_accept_rate == 0.0
+    assert summary.live_incidents == 0
+    assert summary.demo_incidents == 0
+    assert summary.memory_impact.avg_minutes_to_resolve_with_memory is None
+    assert summary.memory_impact.avg_minutes_to_resolve_without_memory is None
+    assert summary.memory_impact.time_saved_percentage is None
+    assert summary.memory_impact.recall_hit_rate is None
+    assert summary.memory_impact.feedback_accept_rate is None
+    assert summary.memory_impact.basis == "insufficient_live_data"
 

@@ -340,34 +340,44 @@ Direct passthrough to Hindsight `recall()` API for the frontend Memory Explorer.
 ### 2.7 Analytics Summary
 
 #### `GET /api/analytics/summary`
-Calculates real metrics derived from actual database records. If the database has zero records, returns zeroes without fabrication.
+Calculates real metrics derived strictly from database records. Metrics are separated between live production runs (`live_runs`) and synthetic benchmark samples (`seeded_sample`). If live samples are insufficient, metrics return `null` with an explanatory note rather than fabricated figures.
 
 **Response (200 OK):**
 ```json
 {
   "total_incidents": 30,
-  "open_incidents": 4,
-  "resolved_incidents": 26,
+  "open_incidents": 5,
+  "resolved_incidents": 25,
+  "live_incidents": 0,
+  "demo_incidents": 30,
   "memory_impact": {
-    "avg_minutes_to_resolve_with_memory": 18.5,
-    "avg_minutes_to_resolve_without_memory": 62.0,
-    "time_saved_percentage": 70.16,
-    "recall_hit_rate": 0.88,
-    "feedback_accept_rate": 0.92
+    "avg_minutes_to_resolve_with_memory": null,
+    "avg_minutes_to_resolve_without_memory": null,
+    "time_saved_percentage": null,
+    "recall_hit_rate": null,
+    "recall_hit_rate_note": "No live memory analyses recorded yet",
+    "feedback_accept_rate": null,
+    "basis": "insufficient_live_data",
+    "demo_benchmark": {
+      "basis": "seeded_sample",
+      "total_sample_incidents": 30,
+      "resolved_sample_incidents": 25,
+      "avg_sample_resolution_minutes": 18.2
+    }
   },
   "severity_breakdown": {
-    "critical": 8,
-    "high": 12,
+    "critical": 9,
+    "high": 13,
     "medium": 7,
-    "low": 3
+    "low": 1
   },
   "service_breakdown": {
-    "payment-api": 9,
-    "auth-service": 6,
+    "payment-api": 5,
+    "auth-service": 5,
     "orders-db": 5,
     "redis-cache": 4,
-    "kafka-consumer": 4,
-    "k8s-ingress": 2
+    "kafka-consumer": 6,
+    "k8s-ingress": 5
   }
 }
 ```
