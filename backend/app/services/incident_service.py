@@ -268,6 +268,7 @@ class IncidentService:
             resolution=res_details,
             retained_in_hindsight=retained,
             hindsight_status=hindsight_status,
+            hindsight_document_id=incident.id if retained else None,
             error=error_msg
         )
 

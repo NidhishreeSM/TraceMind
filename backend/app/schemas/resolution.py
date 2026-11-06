@@ -59,6 +59,10 @@ class ResolveResponse(BaseModel):
         ...,
         description="'retained', 'failed', or 'skipped_unconfigured'"
     )
+    hindsight_document_id: Optional[str] = Field(
+        default=None,
+        description="Document ID stored in Hindsight bank"
+    )
     error: Optional[str] = Field(
         default=None,
         description="Failure reason if Hindsight retain was unsuccessful"

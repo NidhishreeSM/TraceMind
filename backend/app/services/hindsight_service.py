@@ -26,6 +26,20 @@ def parse_source_incident_id(metadata: Optional[Dict[str, Any]], document_id: Op
 
 def deduplicate_memories(items: List[RecalledMemoryItem], max_items: int = 8) -> List[RecalledMemoryItem]:
     """Deduplicates memories (e.g., near-identical observation vs fact text), ranks by score descending, returns top max_items."""
+    # 1. Propagate source_incident_id from items that have it to items that share text
+    known_sources = [
+        (item.source_incident_id, re.sub(r"[^a-z0-9]", "", (item.text or "").lower()))
+        for item in items if item.source_incident_id
+    ]
+    for item in items:
+        if not item.source_incident_id and item.text:
+            item_norm = re.sub(r"[^a-z0-9]", "", item.text.lower())
+            for src_id, known_norm in known_sources:
+                if (len(item_norm) >= 25 and (item_norm in known_norm or known_norm in item_norm)) or \
+                   (item_norm[:40] == known_norm[:40] and len(item_norm) >= 40):
+                    item.source_incident_id = src_id
+                    break
+
     sorted_items = sorted(items, key=lambda x: getattr(x, "score", 0.0) or 0.0, reverse=True)
     deduped: List[RecalledMemoryItem] = []
     seen_normalized: List[str] = []
@@ -38,12 +52,19 @@ def deduplicate_memories(items: List[RecalledMemoryItem], max_items: int = 8) ->
 
         is_dup = False
         for seen in seen_normalized:
-            if norm == seen or norm in seen or seen in norm:
-                min_len = min(len(norm), len(seen))
-                max_len = max(len(norm), len(seen))
-                if min_len / max_len > 0.70:
+            if norm == seen:
+                is_dup = True
+                break
+            if norm in seen or seen in norm:
+                if min(len(norm), len(seen)) >= 25:
                     is_dup = True
                     break
+                min_len = min(len(norm), len(seen))
+                max_len = max(len(norm), len(seen))
+                if min_len / max_len > 0.50:
+                    is_dup = True
+                    break
+
         if not is_dup:
             seen_normalized.append(norm)
             deduped.append(item)

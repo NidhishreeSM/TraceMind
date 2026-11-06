@@ -344,7 +344,7 @@ export const IncidentDetailPage: React.FC = () => {
                   <h3 className="text-sm font-bold text-slate-100">Verified Resolution & Post-Mortem</h3>
                 </div>
                 <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-300">
-                  Retained in Hindsight
+                  Retained in Hindsight • Doc {incident.id}
                 </span>
               </div>
 
@@ -764,6 +764,7 @@ export const IncidentDetailPage: React.FC = () => {
                   <div className="space-y-2.5">
                     {currentAnalysis.recalled_memories.slice(0, 8).map((mem, index) => {
                       const sourceId =
+                        mem.source_incident_id ||
                         (mem.metadata?.incident_id as string) ||
                         mem.text.match(/INC-[\w-]+/)?.[0] ||
                         null;
