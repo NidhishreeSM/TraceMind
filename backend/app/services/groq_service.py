@@ -4,6 +4,7 @@ import time
 from typing import Any, Dict, List, Optional, Tuple
 import groq
 from backend.app.core.config import settings
+from backend.app.core.exceptions import LLMUnavailableException
 from backend.app.core.logging import logger
 from backend.app.schemas.analysis import AIHypothesis, RecalledMemoryItem
 
@@ -51,7 +52,7 @@ class GroqService:
     def _get_client(self) -> groq.Groq:
         if self._client is None:
             if not self.api_key or self.api_key.startswith("your_"):
-                raise ValueError("GROQ_API_KEY is not configured in environment")
+                raise LLMUnavailableException("GROQ_API_KEY is not configured in environment")
             self._client = groq.Groq(api_key=self.api_key, timeout=45.0)
         return self._client
 
@@ -179,22 +180,9 @@ class GroqService:
                 logger.warning(f"Groq call with model {model} failed: {e}. Trying fallback if available.")
                 last_error = e
 
-        # If both models fail, degrade gracefully instead of crashing
-        latency_ms = int((time.time() - start_time) * 1000)
+        # If both models fail, raise LLMUnavailableException
         logger.error(f"All Groq models failed. Last error: {last_error}")
-        return {
-            "hypotheses": [{
-                "description": "AI hypothesis: Automated analysis degraded due to upstream LLM unavailability",
-                "confidence": "low",
-                "rationale": f"Groq inference failed: {str(last_error)}"
-            }],
-            "investigation_steps": [
-                "Verify Groq API quota and network access",
-                "Check system monitoring dashboards directly"
-            ],
-            "recommendation": "Perform manual runbook triage while AI connectivity is restored.",
-            "uncertainty_note": "AI model was unable to complete full synthesis."
-        }, self.primary_model, latency_ms
+        raise LLMUnavailableException(f"Upstream Groq LLM inference failed: {str(last_error)}")
 
 
 groq_service = GroqService()

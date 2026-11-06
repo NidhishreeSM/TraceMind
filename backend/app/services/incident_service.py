@@ -11,7 +11,10 @@ from backend.app.schemas.analysis import AIHypothesis, AnalyzeResponse, Recalled
 from backend.app.schemas.resolution import ResolveRequest, ResolutionDetails, ResolveResponse
 from backend.app.schemas.feedback import FeedbackCreate, FeedbackResponse
 from backend.app.services.groq_service import groq_service
-from backend.app.services.hindsight_service import hindsight_service
+from backend.app.services.hindsight_service import (
+    hindsight_service,
+    deduplicate_memories
+)
 
 
 def get_utc_now():
@@ -93,6 +96,8 @@ class IncidentService:
             raise KeyError(f"Incident {incident_id} not found")
 
         recalled_memories: List[RecalledMemoryItem] = []
+        warnings: List[str] = []
+        effective_use_memory = use_memory
 
         # 1. Real Hindsight Recall (if use_memory=True)
         if use_memory:
@@ -107,14 +112,16 @@ class IncidentService:
                 recalled_memories = hindsight_service.recall(
                     query=recall_query,
                     budget="mid",
-                    max_tokens=2048
+                    max_tokens=4096
                 )
                 logger.info(f"Hindsight recall returned {len(recalled_memories)} items for incident {incident_id}")
             except Exception as e:
                 logger.warning(f"Hindsight recall failed for incident {incident_id}: {e}")
+                warnings.append("Hindsight memory recall was unavailable; fell back to zero-shot first-principles analysis.")
                 recalled_memories = []
+                effective_use_memory = False
 
-        # 2. Call Groq with Incident + Recalled Memories
+        # 2. Call Groq with Incident + Recalled Memories (pass rich context up to 12 items)
         analysis_data, model_used, latency_ms = groq_service.analyze_incident(
             incident_id=incident.id,
             title=incident.title,
@@ -123,21 +130,24 @@ class IncidentService:
             severity=incident.severity,
             symptoms=incident.symptoms,
             error_logs=incident.error_logs,
-            recalled_memories=recalled_memories,
-            use_memory=use_memory
+            recalled_memories=recalled_memories[:12],
+            use_memory=effective_use_memory
         )
 
-        # 3. Persist Analysis in DB
+        # 3. Deduplicate recalled memories for compact API response (max 8, ranked by score)
+        compact_memories = deduplicate_memories(recalled_memories, max_items=8)
+
+        # 4. Persist Analysis in DB
         analysis = Analysis(
             incident_id=incident.id,
-            use_memory=use_memory,
+            use_memory=effective_use_memory,
             model_used=model_used,
             latency_ms=latency_ms,
             hypotheses_json=json.dumps(analysis_data["hypotheses"]),
             investigation_steps_json=json.dumps(analysis_data["investigation_steps"]),
             recommendation=analysis_data["recommendation"],
             uncertainty_note=analysis_data["uncertainty_note"],
-            recalled_memories_json=json.dumps([m.model_dump() for m in recalled_memories]),
+            recalled_memories_json=json.dumps([m.model_dump() for m in compact_memories]),
             created_at=get_utc_now()
         )
         db.add(analysis)
@@ -155,14 +165,15 @@ class IncidentService:
         return AnalyzeResponse(
             id=analysis.id,
             incident_id=incident.id,
-            use_memory=use_memory,
+            use_memory=effective_use_memory,
             model_used=model_used,
             latency_ms=latency_ms,
             hypotheses=hypotheses,
             investigation_steps=analysis_data["investigation_steps"],
             recommendation=analysis_data["recommendation"],
             uncertainty_note=analysis_data["uncertainty_note"],
-            recalled_memories=recalled_memories,
+            recalled_memories=compact_memories,
+            warnings=warnings,
             created_at=analysis.created_at
         )
 

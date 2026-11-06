@@ -25,6 +25,13 @@ All errors (4xx and 5xx) adhere strictly to the following envelope:
 }
 ```
 
+**Standard Error Codes:**
+- `INCIDENT_NOT_FOUND` (404): Requested incident ID does not exist in the database.
+- `VALIDATION_ERROR` (422): Request payload violates field constraints or enums.
+- `HINDSIGHT_UNAVAILABLE` (502): External Hindsight memory service is unreachable or credentials are misconfigured.
+- `LLM_UNAVAILABLE` (502): Upstream Groq inference service failed or credentials are misconfigured.
+- `INTERNAL_ERROR` (500): Unhandled internal server exception.
+
 ### 1.3 Identification & Enums
 - **Incident IDs**: Sequentially formatted with prefix `INC-` (e.g., `INC-001`, `INC-002`, `INC-DEMO-001`).
 - **Severity**: `"critical"`, `"high"`, `"medium"`, `"low"`
@@ -174,6 +181,10 @@ Retrieves detailed information for a specific incident, including prior AI analy
 #### `POST /api/incidents/{id}/analyze`
 Analyzes an incident using Groq AI. If `use_memory=true`, queries Hindsight memory first and supplies recalled past incident lessons to Groq; if `false`, queries Groq in zero-shot isolation.
 
+> **Memory Deduplication & Ranking**: When `use_memory=true`, recalled memories are deduplicated (pruning near-identical observation vs. world fact entries), ranked by relevance score descending, and capped at at most 8 items in `recalled_memories`. Each item includes `source_incident_id` parsed from document ID, metadata, or text.
+> 
+> **Fault Tolerance & Fallback**: If Hindsight memory recall fails during an analysis where `use_memory=true`, the system gracefully falls back to zero-shot first-principles analysis (`use_memory=false`) and appends an advisory entry to the `warnings` array in the response.
+
 **Request Body:**
 ```json
 {
@@ -191,7 +202,7 @@ Analyzes an incident using Groq AI. If `use_memory=true`, queries Hindsight memo
   "latency_ms": 1240,
   "hypotheses": [
     {
-      "description": "Database connection pool leak in connection lifecycle management",
+      "description": "AI hypothesis: Database connection pool leak in connection lifecycle management",
       "confidence": "high",
       "rationale": "Matches prior incident INC-DEMO-001 where unhandled exceptions failed to release connections back to the pool."
     }
@@ -207,12 +218,15 @@ Analyzes an incident using Groq AI. If `use_memory=true`, queries Hindsight memo
       "id": "mem_01hqxyz",
       "text": "Incident INC-DEMO-001: Payment API connection pool exhaustion resolved by fixing unclosed session contexts in payment_gateway.py",
       "type": "experience",
+      "source_incident_id": "INC-DEMO-001",
+      "score": 0.985,
       "metadata": {
         "service": "payment-api",
         "incident_id": "INC-DEMO-001"
       }
     }
   ],
+  "warnings": [],
   "created_at": "2026-11-06T01:32:00Z"
 }
 ```
@@ -332,6 +346,38 @@ Direct passthrough to Hindsight `recall()` API for the frontend Memory Explorer.
     }
   ],
   "total": 1
+}
+```
+
+---
+
+#### `GET /api/memory/stats`
+Retrieves live memory bank statistics directly from Hindsight API (node counts, document counts, fact breakdown, links). If Hindsight is unreachable, returns local database retention counts with `"source": "database"`.
+
+**Response (200 OK):**
+```json
+{
+  "source": "hindsight",
+  "bank_id": "TraceMind",
+  "total_documents": 29,
+  "total_nodes": 210,
+  "total_observations": 108,
+  "nodes_by_fact_type": {
+    "world": 90,
+    "experience": 12,
+    "observation": 108
+  },
+  "total_links": 5321,
+  "links_by_link_type": {
+    "causal": 62,
+    "temporal": 4172,
+    "semantic": 822,
+    "entity": 265
+  },
+  "pending_operations": 0,
+  "failed_operations": 0,
+  "last_consolidated_at": "2026-11-06T18:40:52.635193+00:00",
+  "last_memory_write_at": "2026-11-06T18:40:52.636000+00:00"
 }
 ```
 

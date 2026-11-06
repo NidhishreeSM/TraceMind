@@ -13,6 +13,7 @@ class RecalledMemoryItem(BaseModel):
     id: Optional[str] = Field(default=None, description="Hindsight memory ID")
     text: str = Field(..., description="Exact recalled fact or lesson from Hindsight memory bank")
     type: Optional[str] = Field(default=None, description="Memory type: experience, world, or observation")
+    source_incident_id: Optional[str] = Field(default=None, description="Original incident ID parsed from metadata or document ID")
     metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata tags attached to the memory")
     score: Optional[float] = Field(default=None, description="Relevance score from multi-strategy retrieval")
     scores: Optional[Dict[str, Any]] = Field(default=None, description="Detailed scoring breakdown")
@@ -36,6 +37,7 @@ class AnalyzeResponse(BaseModel):
     recommendation: str = Field(..., description="Synthesized actionable remediation recommendation")
     uncertainty_note: str = Field(..., description="Clear disclosure of limitations, missing telemetry, or assumptions")
     recalled_memories: List[RecalledMemoryItem] = Field(default_factory=list, description="Exact Hindsight memories retrieved")
+    warnings: List[str] = Field(default_factory=list, description="Non-fatal operational warnings (e.g. memory fallback)")
     created_at: datetime
 
     model_config = {"from_attributes": True}

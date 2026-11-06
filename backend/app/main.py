@@ -5,6 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from backend.app.core.config import settings
 from backend.app.core.logging import logger
+from backend.app.core.exceptions import (
+    HindsightUnavailableException,
+    LLMUnavailableException,
+    sanitize_error_message
+)
 from backend.app.models.database import init_db
 from backend.app.routes import (
     health_router, incidents_router, memory_router, analytics_router
@@ -76,15 +81,17 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         409: "CONFLICT",
         422: "UNPROCESSABLE_ENTITY",
         500: "INTERNAL_ERROR",
+        502: "BAD_GATEWAY",
         503: "SERVICE_UNAVAILABLE"
     }
-    error_code = code_mapping.get(exc.status_code, "ERROR")
+    error_code = getattr(exc, "code", None) or (exc.headers or {}).get("X-Error-Code") or code_mapping.get(exc.status_code, "ERROR")
+    sanitized_msg = sanitize_error_message(str(exc.detail))
     return JSONResponse(
         status_code=exc.status_code,
         content={
             "error": {
                 "code": error_code,
-                "message": str(exc.detail),
+                "message": sanitized_msg,
                 "details": getattr(exc, "headers", None)
             }
         }

@@ -164,6 +164,8 @@ def analyze_incident(incident_id: str, payload: AnalyzeRequest = AnalyzeRequest(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Incident {incident_id} not found"
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -184,6 +186,8 @@ def resolve_incident(incident_id: str, payload: ResolveRequest, db: Session = De
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Incident {incident_id} not found"
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -201,6 +205,8 @@ def add_incident_feedback(incident_id: str, payload: FeedbackCreate, db: Session
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Incident {incident_id} not found"
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

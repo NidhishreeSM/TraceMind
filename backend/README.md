@@ -228,7 +228,12 @@ curl -X POST http://localhost:8000/api/memory/recall \
   }'
 ```
 
-### 6.10 Get Analytics Summary
+### 6.10 Get Memory Bank Statistics
+```bash
+curl -X GET http://localhost:8000/api/memory/stats
+```
+
+### 6.11 Get Analytics Summary
 ```bash
 curl -X GET http://localhost:8000/api/analytics/summary
 ```

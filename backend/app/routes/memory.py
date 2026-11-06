@@ -1,5 +1,12 @@
-from fastapi import APIRouter, HTTPException, status
-from backend.app.schemas.memory import MemoryRecallRequest, MemoryRecallResponse
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from backend.app.core.exceptions import HindsightUnavailableException
+from backend.app.models.database import get_db, Incident, Resolution
+from backend.app.schemas.memory import (
+    MemoryRecallRequest,
+    MemoryRecallResponse,
+    MemoryStatsResponse
+)
 from backend.app.services.hindsight_service import hindsight_service
 
 router = APIRouter(prefix="/memory", tags=["Memory Explorer"])
@@ -26,8 +33,32 @@ def memory_recall_passthrough(payload: MemoryRecallRequest):
             "total": len(formatted_results)
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Hindsight recall operation failed: {str(e)}"
-        )
+        raise HindsightUnavailableException(f"Hindsight recall operation failed: {str(e)}")
+
+
+@router.get("/stats", response_model=MemoryStatsResponse)
+def get_memory_stats(db: Session = Depends(get_db)):
+    """
+    Returns authentic memory bank statistics directly from Hindsight API.
+    If Hindsight is unavailable, falls back to local database retention counts with source='database'.
+    """
+    if hindsight_service.is_configured():
+        try:
+            stats = hindsight_service.get_memory_stats()
+            if stats.get("source") == "hindsight":
+                return stats
+        except Exception:
+            pass
+
+    # Database Fallback
+    total_incidents = db.query(Incident).count()
+    retained_count = db.query(Resolution).filter(Resolution.retained_in_hindsight == True).count()
+    return {
+        "source": "database",
+        "bank_id": hindsight_service.bank_id,
+        "total_retained_resolutions": retained_count,
+        "total_incidents": total_incidents,
+        "message": "Hindsight API unavailable or unconfigured; counts reported from local database."
+    }
+
 

@@ -60,7 +60,7 @@ def run_smoke_test():
 
     # 3. Retain sample incident
     print("\n" + "=" * 40 + " [STEP 1: RETAIN] " + "=" * 40)
-    incident_id = "INC-DEMO-001"
+    incident_id = "INC-SMOKE-001"
     print(f"Retaining sample incident: {incident_id}")
     print("  Service:             payment-api")
     print("  Environment:         production")

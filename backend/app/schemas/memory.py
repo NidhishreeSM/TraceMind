@@ -20,3 +20,20 @@ class MemoryRecallResponse(BaseModel):
     )
     total: int
 
+
+class MemoryStatsResponse(BaseModel):
+    source: str = Field(..., description="'hindsight' if derived from live Hindsight API, 'database' if fallback")
+    bank_id: Optional[str] = None
+    total_documents: Optional[int] = None
+    total_nodes: Optional[int] = None
+    total_observations: Optional[int] = None
+    nodes_by_fact_type: Optional[Dict[str, int]] = None
+    total_links: Optional[int] = None
+    links_by_link_type: Optional[Dict[str, int]] = None
+    total_retained_resolutions: Optional[int] = None
+    total_incidents: Optional[int] = None
+    message: Optional[str] = None
+    last_consolidated_at: Optional[str] = None
+    last_memory_write_at: Optional[str] = None
+
+

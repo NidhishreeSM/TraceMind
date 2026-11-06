@@ -125,3 +125,46 @@ def test_analytics_metrics_empty_db(memory_db):
     assert summary.memory_impact.feedback_accept_rate is None
     assert summary.memory_impact.basis == "insufficient_live_data"
 
+
+def test_recalled_memory_deduplication_and_source_id():
+    """Verifies that deduplicate_memories drops near-duplicate texts and preserves score ranking."""
+    from backend.app.schemas.analysis import RecalledMemoryItem
+    from backend.app.services.hindsight_service import deduplicate_memories, parse_source_incident_id
+
+    # Test parse_source_incident_id
+    assert parse_source_incident_id({"incident_id": "INC-042"}, None, "text") == "INC-042"
+    assert parse_source_incident_id(None, "INC-099", "text") == "INC-099"
+    assert parse_source_incident_id(None, None, "Observed in INC-123 during rollout") == "INC-123"
+
+    items = [
+        RecalledMemoryItem(id="1", text="Payment API connection pool was exhausted in production.", score=0.99, source_incident_id="INC-001"),
+        RecalledMemoryItem(id="2", text="Payment API connection pool was exhausted in production on 2026-11-05.", score=0.95, source_incident_id=None),
+        RecalledMemoryItem(id="3", text="Redis cache cluster hit maximum memory threshold.", score=0.80, source_incident_id="INC-002"),
+    ]
+    deduped = deduplicate_memories(items, max_items=8)
+    # The near-identical second memory should be dropped, leaving 2 items
+    assert len(deduped) == 2
+    assert deduped[0].id == "1"
+    assert deduped[1].id == "3"
+
+
+def test_error_envelope_mapping():
+    """Verifies that Hindsight and Groq exceptions map to HTTP 502 with standard envelope."""
+    from unittest.mock import patch
+    from fastapi.testclient import TestClient
+    from backend.app.main import app
+    from backend.app.core.exceptions import HindsightUnavailableException, LLMUnavailableException
+
+    client = TestClient(app)
+
+    with patch("backend.app.routes.memory.hindsight_service.recall", side_effect=HindsightUnavailableException("Connection dropped")):
+        res = client.post("/api/memory/recall", json={"query": "test query"})
+        assert res.status_code == 502
+        assert res.json()["error"]["code"] == "HINDSIGHT_UNAVAILABLE"
+
+    with patch("backend.app.services.incident_service.groq_service.analyze_incident", side_effect=LLMUnavailableException("Rate limit")):
+        res = client.post("/api/incidents/INC-001/analyze", json={"use_memory": False})
+        assert res.status_code == 502
+        assert res.json()["error"]["code"] == "LLM_UNAVAILABLE"
+
+
