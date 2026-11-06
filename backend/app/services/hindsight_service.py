@@ -386,6 +386,30 @@ class HindsightService:
 
         return self._run_client(_stats)
 
+    def wait_for_document_indexed(self, document_id: str, timeout_sec: float = 30.0) -> bool:
+        """Polls Hindsight API until document is confirmed indexed with extracted memory units."""
+        if not self.is_configured():
+            return False
+
+        async def _poll(client: hindsight_client.Hindsight):
+            start = time.time()
+            while (time.time() - start) < timeout_sec:
+                try:
+                    doc = await client.documents.get_document(
+                        bank_id=self.bank_id,
+                        document_id=document_id
+                    )
+                    unit_count = getattr(doc, "memory_unit_count", 0) or 0
+                    if unit_count > 0:
+                        logger.info(f"Document {document_id} indexed with {unit_count} memory units in {time.time() - start:.1f}s")
+                        return True
+                except Exception:
+                    pass
+                await asyncio.sleep(1.0)
+            return False
+
+        return self._run_client(_poll)
+
     def close(self):
         """No persistent sessions need closing with the scoped client pattern."""
         pass

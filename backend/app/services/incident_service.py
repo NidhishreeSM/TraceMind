@@ -27,7 +27,7 @@ def generate_next_incident_id(db: Session) -> str:
     results = db.scalars(select(Incident.id)).all()
     max_num = 0
     for inc_id in results:
-        match = re.search(r"INC-(\d+)", inc_id)
+        match = re.search(r"^INC-(\d+)$", inc_id)
         if match:
             num = int(match.group(1))
             if num > max_num:

@@ -163,7 +163,7 @@ def test_error_envelope_mapping():
         assert res.json()["error"]["code"] == "HINDSIGHT_UNAVAILABLE"
 
     with patch("backend.app.services.incident_service.groq_service.analyze_incident", side_effect=LLMUnavailableException("Rate limit")):
-        res = client.post("/api/incidents/INC-001/analyze", json={"use_memory": False})
+        res = client.post("/api/incidents/INC-DEMO-001/analyze", json={"use_memory": False})
         assert res.status_code == 502
         assert res.json()["error"]["code"] == "LLM_UNAVAILABLE"
 
