@@ -321,8 +321,9 @@ export const DashboardPage: React.FC = () => {
 
             {/* Check if enough live data exists */}
             {isLiveCredible &&
-            memory?.avg_minutes_to_resolve_with_memory !== null &&
-            memory?.avg_minutes_to_resolve_without_memory !== null ? (
+            memory &&
+            memory.avg_minutes_to_resolve_with_memory != null &&
+            memory.avg_minutes_to_resolve_without_memory != null ? (
               <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Without Memory Metric */}
                 <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
