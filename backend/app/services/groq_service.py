@@ -15,10 +15,12 @@ Tagline: "Every incident teaches. Every resolution makes us smarter."
 Your job is to analyze live system incidents and synthesize hypotheses, diagnostic steps, and recommendations.
 CRITICAL RULES:
 1. Every hypothesis description MUST begin with "AI hypothesis: " and be framed as a hypothesis to verify, NEVER as a confirmed fact.
-2. If RECALLED INSTITUTIONAL MEMORIES are provided:
-   - Your recommendation MUST explicitly name the specific past incident ID(s) (e.g., INC-DEMO-001) that matches this failure pattern.
-   - You MUST explain what verified resolution fixed it previously and why that historical lesson applies here.
-   - If memories were queried but none are relevant, state explicitly: "No matching past incident memories were found for these symptoms." (Do NOT invent history).
+2. RELEVANCE EVALUATION FOR RECALLED MEMORIES:
+   - Critically evaluate whether any recalled memory genuinely matches this specific failure mechanism, affected service domain, and root cause.
+   - ONLY cite a recalled incident as a precedent if it is GENUINELY AND DIRECTLY RELEVANT.
+   - NEVER force an analogy or present unrelated or loosely related incidents (such as generic NTP drift, database connection pool, or cache incidents) as proven fixes for a completely distinct failure mode.
+   - If NONE of the recalled memories directly match this incident's root cause, your recommendation MUST explicitly state: "No directly relevant past incident found." followed by first-principles engineering guidance. Do NOT cite any INC-DEMO-* incident as a precedent when it does not directly apply.
+   - If a recalled memory IS directly relevant (same core root cause and fix): cite the specific past incident ID (e.g. INC-001) and explain how its verified resolution applies.
 3. If MEMORY IS DISABLED:
    - Perform zero-shot first-principles engineering triage.
    - Do NOT reference or invent any prior incidents, historical incident IDs, or past organizational lessons.
@@ -116,7 +118,9 @@ class GroqService:
                 user_prompt_lines.append(f"  {mem.text}")
                 if mem.metadata:
                     user_prompt_lines.append(f"  Metadata: {json.dumps(mem.metadata)}")
-            user_prompt_lines.append("\nUse these recalled patterns to inform your hypotheses and recommendations.")
+            user_prompt_lines.append("\nEvaluate whether any of these memories genuinely match this incident's core root cause:")
+            user_prompt_lines.append("- If a memory is directly relevant: cite its incident ID and verified resolution as proven guidance.")
+            user_prompt_lines.append("- If none of the recalled memories are directly relevant: do NOT force a connection or cite unrelated demo incidents. State in your recommendation 'No directly relevant past incident found.' and provide first-principles engineering guidance.")
         elif use_memory and not recalled_memories:
             user_prompt_lines.append("\n[Hindsight Memory Note]: No matching past incident memories were found for these symptoms.")
         else:

@@ -173,10 +173,15 @@ def run_learning_loop(scenario_name: str):
         print(f"\nAI Recommendation:\n  {analysis_a.recommendation}")
         print(f"\nUncertainty Note:\n  {analysis_a.uncertainty_note}")
 
-        # Check recommendation honesty
+        # Check recommendation honesty: must say 'no directly relevant past incident found' and NOT cite any INC-DEMO-*
         rec_lower = analysis_a.recommendation.lower()
-        unc_lower = analysis_a.uncertainty_note.lower()
-        print(f"\n✓ Honest Baseline Check: Model provided first-principles engineering guidance without citing non-existent past fixes.")
+        assert "no directly relevant past incident found" in rec_lower, (
+            f"ASSERTION FAILED: Step A recommendation must state 'no directly relevant past incident found'. Got:\n{analysis_a.recommendation}"
+        )
+        assert "inc-demo-" not in rec_lower, (
+            f"ASSERTION FAILED: Step A recommendation cited an unrelated INC-DEMO-* incident as a precedent! Got:\n{analysis_a.recommendation}"
+        )
+        print(f"\n✓ Honest Baseline Check: Confirmed 'no directly relevant past incident found' and 0 INC-DEMO-* incidents cited as proven fixes.")
 
         # -------------------------------------------------------------------------
         # STEP (b): Resolve Incident A & Poll Hindsight Async Indexing
