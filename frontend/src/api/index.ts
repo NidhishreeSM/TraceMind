@@ -14,6 +14,7 @@ import {
   Feedback,
   MemoryRecallRequest,
   MemoryRecallResponse,
+  MemoryStatsResponse,
   AnalyticsSummary,
   ApiErrorPayload,
 } from '../types';
@@ -113,9 +114,32 @@ export async function sendFeedback(id: string, req: FeedbackRequest): Promise<Fe
 
 /**
  * POST /api/memory/recall
+ * Sends { query } by default, adding optional contract filters only when provided.
  */
 export async function recallMemory(req: MemoryRecallRequest): Promise<MemoryRecallResponse> {
-  const response = await apiClient.post<MemoryRecallResponse>('/memory/recall', req);
+  const payload: Record<string, unknown> = {
+    query: req.query,
+  };
+  if (req.types && req.types.length > 0) {
+    payload.types = req.types;
+  }
+  if (req.budget) {
+    payload.budget = req.budget;
+  }
+  if (req.limit) {
+    payload.limit = req.limit;
+  }
+
+  const response = await apiClient.post<MemoryRecallResponse>('/memory/recall', payload);
+  return response.data;
+}
+
+/**
+ * GET /api/memory/stats
+ * Retrieves live memory bank statistics directly from Hindsight API
+ */
+export async function getMemoryStats(): Promise<MemoryStatsResponse> {
+  const response = await apiClient.get<MemoryStatsResponse>('/memory/stats');
   return response.data;
 }
 

@@ -1,11 +1,11 @@
 /**
  * TraceMind API Contract Types (v1)
- * Strictly synchronized with docs/API_CONTRACT.md (including Issue 4 analytics contract updates)
+ * Strictly synchronized with docs/API_CONTRACT.md
  */
 
 export type Severity = 'critical' | 'high' | 'medium' | 'low';
 export type Environment = 'production' | 'staging' | 'development';
-export type Status = 'open' | 'investigating' | 'mitigated' | 'resolved';
+export type Status = 'open' | 'investigating' | 'resolved';
 export type FeedbackType = 'accept' | 'reject' | 'modify';
 
 export interface ServiceHealth {
@@ -78,6 +78,7 @@ export interface RecalledMemory {
   text: string;
   type: string;
   entities?: string[];
+  source_incident_id?: string | null;
   score?: number | null;
   metadata?: {
     service?: string;
@@ -161,12 +162,29 @@ export interface MemoryRecallRequest {
   query: string;
   types?: string[];
   budget?: 'low' | 'mid' | 'high' | string;
+  limit?: number;
 }
 
 export interface MemoryRecallResponse {
   query: string;
   results: RecalledMemory[];
   total: number;
+}
+
+export interface MemoryStatsResponse {
+  source: 'hindsight' | 'database' | string;
+  bank_id?: string | null;
+  total_documents?: number | null;
+  total_nodes?: number | null;
+  total_observations?: number | null;
+  nodes_by_fact_type?: Record<string, number> | null;
+  total_links?: number | null;
+  links_by_link_type?: Record<string, number> | null;
+  total_retained_resolutions?: number | null;
+  total_incidents?: number | null;
+  message?: string | null;
+  last_consolidated_at?: string | null;
+  last_memory_write_at?: string | null;
 }
 
 export interface DemoBenchmark {

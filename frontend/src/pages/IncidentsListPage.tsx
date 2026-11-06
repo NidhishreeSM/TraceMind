@@ -171,7 +171,7 @@ export const IncidentsListPage: React.FC = () => {
             <span className="text-slate-400 flex items-center gap-1 font-mono text-[11px]">
               <SlidersHorizontal className="w-3 h-3" /> Status:
             </span>
-            {['all', 'open', 'investigating', 'mitigated', 'resolved'].map((st) => (
+            {['all', 'open', 'investigating', 'resolved'].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}

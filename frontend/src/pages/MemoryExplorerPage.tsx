@@ -8,7 +8,7 @@ import {
   Tag,
   SlidersHorizontal,
 } from 'lucide-react';
-import { recallMemory, extractErrorMessage } from '../api';
+import { recallMemory, getMemoryStats, extractErrorMessage } from '../api';
 import { RecalledMemory } from '../types';
 import { EmptyState } from '../components/common/EmptyState';
 import { ErrorBanner } from '../components/common/ErrorBanner';
@@ -25,7 +25,7 @@ const EXAMPLE_QUERIES = [
 export const MemoryExplorerPage: React.FC = () => {
   const toast = useToast();
   const [query, setQuery] = useState('database connection pool leak');
-  const [budget, setBudget] = useState<'low' | 'mid' | 'high'>('mid');
+  const [bankId, setBankId] = useState<string>('TraceMind');
   const [results, setResults] = useState<RecalledMemory[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -41,11 +41,8 @@ export const MemoryExplorerPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await recallMemory({
-        query: q,
-        types: ['experience', 'world', 'observation'],
-        budget,
-      });
+      // POST /api/memory/recall sends { query }
+      const res = await recallMemory({ query: q });
       setResults(res.results || []);
       setSearched(true);
     } catch (err) {
@@ -57,11 +54,12 @@ export const MemoryExplorerPage: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
-    recallMemory({
-      query: 'database connection pool leak',
-      types: ['experience', 'world', 'observation'],
-      budget: 'mid',
-    })
+
+    getMemoryStats().then((s) => {
+      if (isMounted && s?.bank_id) setBankId(s.bank_id);
+    }).catch(() => {});
+
+    recallMemory({ query: 'database connection pool leak' })
       .then((res) => {
         if (isMounted) {
           setResults(res.results || []);
@@ -96,7 +94,7 @@ export const MemoryExplorerPage: React.FC = () => {
               <span className="text-xs font-mono uppercase px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30">
                 Institutional Retain & Recall
               </span>
-              <span className="text-xs text-slate-400 font-mono">Bank: tracemind-production</span>
+              <span className="text-xs text-slate-400 font-mono">Bank: {bankId}</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight mt-1.5 flex items-center gap-2">
               <Brain className="w-6 h-6 text-teal-400" />
@@ -135,18 +133,6 @@ export const MemoryExplorerPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Recall Budget Selector */}
-            <select
-              value={budget}
-              onChange={(e) => setBudget(e.target.value as 'low' | 'mid' | 'high')}
-              className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono text-slate-300 focus:outline-hidden focus:border-teal-500 cursor-pointer"
-              title="Recall reasoning budget"
-            >
-              <option value="low">Budget: Low</option>
-              <option value="mid">Budget: Mid (Default)</option>
-              <option value="high">Budget: High</option>
-            </select>
-
             <button
               type="submit"
               disabled={loading}
@@ -269,7 +255,7 @@ export const MemoryExplorerPage: React.FC = () => {
                     )}
 
                     <span className="text-[10px] font-mono text-slate-500">
-                      Hindsight Bank
+                      Bank: {bankId}
                     </span>
                   </div>
                 </div>

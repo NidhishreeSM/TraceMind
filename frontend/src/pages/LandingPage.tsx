@@ -36,10 +36,10 @@ export const LandingPage: React.FC = () => {
             Open Operations Console <ArrowRight className="w-4 h-4 stroke-[2.5]" />
           </Link>
           <Link
-            to="/incidents/INC-001"
+            to="/incidents/INC-DEMO-001"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-sm font-semibold transition"
           >
-            Launch Hero Demo (INC-001)
+            Launch Hero Demo (INC-DEMO-001)
           </Link>
         </div>
       </div>
@@ -54,23 +54,23 @@ export const LandingPage: React.FC = () => {
             Why Do Identical Outages Strike Every Quarter?
           </h3>
           <p className="text-sm text-slate-400 mt-2 leading-relaxed">
-            Engineers leave, post-mortems sit buried in Google Docs, and on-call responders restart services blindly. When isolated LLMs are called during triage, they offer generic suggestions that ignore institutional history.
+            Engineers leave, post-mortems sit buried in docs, and on-call responders restart services blindly. When isolated LLMs are called during triage, they offer generic suggestions that ignore institutional history.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-800">
           <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-            <div className="text-rose-400 font-mono font-bold text-sm">62.0 min MTTR</div>
-            <div className="text-xs text-slate-300 font-medium">Zero-Shot Guesswork</div>
+            <div className="text-rose-400 font-mono font-bold text-sm">Zero-Shot Guesswork</div>
+            <div className="text-xs text-slate-300 font-medium">Prolonged Downtime</div>
             <p className="text-xs text-slate-500">
-              Without memory, responders waste 40+ minutes diagnosing known connection pool exhaustion and cache bugs.
+              Without memory, responders waste hours diagnosing recurrent connection leaks, token invalidation, and queue storms.
             </p>
           </div>
           <div className="p-4 rounded-xl bg-teal-950/30 border border-teal-500/40 space-y-2">
-            <div className="text-teal-300 font-mono font-bold text-sm">18.5 min MTTR</div>
-            <div className="text-xs text-teal-200 font-medium">With Hindsight Memory</div>
+            <div className="text-teal-300 font-mono font-bold text-sm">With Hindsight Memory</div>
+            <div className="text-xs text-teal-200 font-medium">Grounded Institutional Recall</div>
             <p className="text-xs text-teal-400/80">
-              Immediate recall of verified fixes slashes resolution time by ~70.2%, pointing directly to the root cause.
+              Immediate recall of verified resolutions bypasses dead-ends and targets confirmed root causes directly.
             </p>
           </div>
           <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
@@ -157,13 +157,13 @@ export const LandingPage: React.FC = () => {
           <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
             <div className="font-mono text-teal-400 font-bold text-xs">Step 1: Dashboard</div>
             <p className="text-slate-300">
-              Review live telemetry chip, MTTR impact card (70.2% time saved), and recent incident feed.
+              Review live telemetry chip, MTTR impact breakdown, and recent incident feed.
             </p>
           </div>
           <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
             <div className="font-mono text-teal-400 font-bold text-xs">Step 2: Hero Triage</div>
             <p className="text-slate-300">
-              Open <strong>INC-001</strong>. Toggle "Side-by-Side Compare Mode" to see zero-shot vs Hindsight memory recall.
+              Open <strong>INC-DEMO-001</strong>. Toggle "Side-by-Side Compare Mode" to see zero-shot vs Hindsight memory recall.
             </p>
           </div>
           <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">

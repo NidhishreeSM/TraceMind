@@ -333,6 +333,39 @@ if (USE_MOCKS) {
       };
     }
 
+    // 10. GET /memory/stats
+    if (url === '/memory/stats' && method === 'get') {
+      return {
+        data: {
+          source: 'hindsight',
+          bank_id: 'TraceMind',
+          total_documents: 29,
+          total_nodes: 210,
+          total_observations: 108,
+          nodes_by_fact_type: {
+            world: 90,
+            experience: 12,
+            observation: 108,
+          },
+          total_links: 5321,
+          links_by_link_type: {
+            causal: 62,
+            temporal: 4172,
+            semantic: 822,
+            entity: 265,
+          },
+          pending_operations: 0,
+          failed_operations: 0,
+          last_consolidated_at: new Date().toISOString(),
+          last_memory_write_at: new Date().toISOString(),
+        },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config,
+      };
+    }
+
     // Fallback for unhandled mock route
     throw new AxiosError(`Mock route not implemented: ${method.toUpperCase()} ${url}`, '404', config);
   };

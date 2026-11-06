@@ -17,7 +17,7 @@ import {
   Columns,
   ExternalLink,
 } from 'lucide-react';
-import { getIncident, analyzeIncident, extractErrorMessage } from '../api';
+import { getIncident, analyzeIncident, getMemoryStats, extractErrorMessage } from '../api';
 import {
   IncidentDetail,
   Analysis,
@@ -37,6 +37,7 @@ export const IncidentDetailPage: React.FC = () => {
   const toast = useToast();
 
   const [incident, setIncident] = useState<IncidentDetail | null>(null);
+  const [bankId, setBankId] = useState<string>('TraceMind');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -88,6 +89,10 @@ export const IncidentDetailPage: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
     if (!id) return;
+
+    getMemoryStats().then((s) => {
+      if (isMounted && s?.bank_id) setBankId(s.bank_id);
+    }).catch(() => {});
 
     getIncident(id)
       .then((data) => {
@@ -586,7 +591,7 @@ export const IncidentDetailPage: React.FC = () => {
 
                       <div className="text-[11px] text-emerald-300 font-semibold flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Saves an estimated ~43.5 minutes of debugging!
+                        Institutional memory targets confirmed root cause directly.
                       </div>
                     </div>
                   ) : (
@@ -752,7 +757,7 @@ export const IncidentDetailPage: React.FC = () => {
                       Recalled From Hindsight Memory Bank ({Math.min(currentAnalysis.recalled_memories.length, 8)})
                     </h4>
                     <span className="text-[10px] font-mono text-teal-400/80">
-                      Bank: tracemind-production
+                      Bank: {bankId}
                     </span>
                   </div>
 

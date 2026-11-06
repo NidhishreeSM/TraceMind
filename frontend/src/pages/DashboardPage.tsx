@@ -16,7 +16,7 @@ import {
   Info,
 } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { getAnalyticsSummary, getIncidents, extractErrorMessage } from '../api';
+import { getAnalyticsSummary, getIncidents, getMemoryStats, extractErrorMessage } from '../api';
 import { AnalyticsSummary, Incident } from '../types';
 import { SeverityBadge, StatusBadge, DemoBadge } from '../components/common/Badge';
 import { CardSkeleton, TableSkeleton } from '../components/common/Skeleton';
@@ -45,6 +45,7 @@ function hasEnoughLiveSamples(
 export const DashboardPage: React.FC = () => {
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
   const [recentIncidents, setRecentIncidents] = useState<Incident[]>([]);
+  const [bankId, setBankId] = useState<string>('TraceMind');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,12 +53,14 @@ export const DashboardPage: React.FC = () => {
     try {
       if (isManual) setLoading(true);
       setError(null);
-      const [analyticsData, incidentsData] = await Promise.all([
+      const [analyticsData, incidentsData, statsData] = await Promise.all([
         getAnalyticsSummary(),
         getIncidents({ limit: 5 }),
+        getMemoryStats().catch(() => null),
       ]);
       setSummary(analyticsData);
       setRecentIncidents(incidentsData.items || []);
+      if (statsData?.bank_id) setBankId(statsData.bank_id);
     } catch (err) {
       setError(extractErrorMessage(err));
     } finally {
@@ -67,11 +70,16 @@ export const DashboardPage: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
-    Promise.all([getAnalyticsSummary(), getIncidents({ limit: 5 })])
-      .then(([analyticsData, incidentsData]) => {
+    Promise.all([
+      getAnalyticsSummary(),
+      getIncidents({ limit: 5 }),
+      getMemoryStats().catch(() => null),
+    ])
+      .then(([analyticsData, incidentsData, statsData]) => {
         if (isMounted) {
           setSummary(analyticsData);
           setRecentIncidents(incidentsData.items || []);
+          if (statsData?.bank_id) setBankId(statsData.bank_id);
           setLoading(false);
         }
       })
@@ -233,7 +241,7 @@ export const DashboardPage: React.FC = () => {
           </div>
           <div className="mt-3 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
             <span>Bank scope</span>
-            <span className="font-mono text-teal-300 font-medium">tracemind-production</span>
+            <span className="font-mono text-teal-300 font-medium">{bankId}</span>
           </div>
         </div>
 
@@ -584,12 +592,12 @@ export const DashboardPage: React.FC = () => {
               </Link>
 
               <Link
-                to="/incidents/INC-001"
+                to="/incidents/INC-DEMO-001"
                 className="w-full flex items-center justify-between p-3 rounded-xl bg-teal-950/40 hover:bg-teal-900/50 border border-teal-500/30 text-xs font-medium text-teal-300 transition"
               >
                 <span className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-teal-400" />
-                  Launch Hero Demo (INC-001)
+                  Launch Hero Demo (INC-DEMO-001)
                 </span>
                 <ChevronRight className="w-3.5 h-3.5 text-teal-400" />
               </Link>

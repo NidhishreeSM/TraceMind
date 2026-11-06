@@ -28,7 +28,7 @@ export const mockHealth: HealthResponse = {
     },
     hindsight: {
       status: 'healthy',
-      bank_id: 'tracemind-production',
+      bank_id: 'TraceMind',
       message: 'Connected to Hindsight engine',
     },
   },

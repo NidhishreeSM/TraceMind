@@ -73,13 +73,6 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
       dot: 'bg-sky-400 animate-pulse',
       icon: <Activity className="w-3.5 h-3.5 text-sky-400" />,
     },
-    mitigated: {
-      bg: 'bg-amber-950/60',
-      text: 'text-amber-300',
-      border: 'border-amber-500/40',
-      dot: 'bg-amber-400',
-      icon: <AlertCircle className="w-3.5 h-3.5 text-amber-400" />,
-    },
     resolved: {
       bg: 'bg-emerald-950/60',
       text: 'text-emerald-300',
