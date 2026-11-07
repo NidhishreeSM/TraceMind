@@ -31,7 +31,7 @@ export const Logo: React.FC<LogoProps> = ({
           viewBox="0 0 40 40"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full drop-shadow-[0_0_12px_rgba(20,184,166,0.35)]"
+          className="w-full h-full"
         >
           {/* Hexagonal Shield */}
           <polygon
@@ -62,9 +62,6 @@ export const Logo: React.FC<LogoProps> = ({
         <div className="flex items-center gap-1.5">
           <span className={`text-slate-100 font-bold ${textSizes[size]}`}>
             Trace<span className="text-teal-400">Mind</span>
-          </span>
-          <span className="text-[10px] font-mono uppercase tracking-widest text-teal-400/80 bg-teal-950/80 border border-teal-800/60 px-1.5 py-0.5 rounded">
-            OPS AI
           </span>
         </div>
         {showTagline && (

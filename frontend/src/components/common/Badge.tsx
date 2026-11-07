@@ -63,14 +63,14 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
       bg: 'bg-red-950/60',
       text: 'text-red-300',
       border: 'border-red-600/40',
-      dot: 'bg-red-400 animate-pulse',
+      dot: 'bg-red-400',
       icon: <Clock className="w-3.5 h-3.5 text-red-400" />,
     },
     investigating: {
       bg: 'bg-sky-950/60',
       text: 'text-sky-300',
       border: 'border-sky-500/40',
-      dot: 'bg-sky-400 animate-pulse',
+      dot: 'bg-sky-400',
       icon: <Activity className="w-3.5 h-3.5 text-sky-400" />,
     },
     resolved: {
@@ -86,7 +86,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${current.bg} ${current.text} ${current.border} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium border capitalize ${current.bg} ${current.text} ${current.border} ${className}`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${current.dot}`} />
       {status}
@@ -96,11 +96,10 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
 
 export const DemoBadge: React.FC<{ className?: string }> = ({ className = '' }) => (
   <span
-    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider bg-purple-950/70 border border-purple-500/50 text-purple-300 ${className}`}
-    title="Generated synthetic post-mortem for memory benchmarking"
+    className={`inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono text-slate-400 bg-slate-800/80 border border-slate-700/60 ${className}`}
+    title="Synthetic benchmark incident"
   >
-    <Sparkles className="w-3 h-3 text-purple-400" />
-    Sample Data
+    sample
   </span>
 );
 
