@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   AlertOctagon,
@@ -16,6 +16,9 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
+  const location = useLocation();
+  const pathname = location.pathname.replace(/\/$/, '') || '/';
+
   const navItems = [
     { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
     { label: 'Incidents', to: '/incidents', icon: AlertOctagon },
@@ -24,13 +27,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
     { label: 'Analytics', to: '/analytics', icon: BarChart3 },
   ];
 
+  const isItemActive = (to: string) => {
+    if (to === '/incidents') {
+      // Active on /incidents and /incidents/:id, but NOT on /incidents/new
+      return (
+        pathname === '/incidents' ||
+        (pathname.startsWith('/incidents/') && pathname !== '/incidents/new')
+      );
+    }
+    if (to === '/incidents/new') {
+      return pathname === '/incidents/new';
+    }
+    if (to === '/') {
+      return pathname === '/';
+    }
+    return pathname === to;
+  };
+
   return (
     <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-full shrink-0 select-none">
       {/* Brand Header */}
       <div className="p-4 border-b border-slate-800">
-        <NavLink to="/dashboard" onClick={onNavigate}>
+        <Link to="/dashboard" onClick={onNavigate}>
           <Logo size="md" />
-        </NavLink>
+        </Link>
       </div>
 
       {/* Navigation Links */}
@@ -40,36 +60,41 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         </div>
         {navItems.map((item) => {
           const Icon = item.icon;
+          const active = isItemActive(item.to);
           return (
-            <NavLink
+            <Link
               key={item.to}
               to={item.to}
               onClick={onNavigate}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'bg-teal-500/15 text-teal-300 border border-teal-500/30'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
-                }`
-              }
+              aria-current={active ? 'page' : undefined}
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                active
+                  ? 'bg-teal-500/15 text-teal-300 border border-teal-500/30 font-semibold'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
+              }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
               <span>{item.label}</span>
-            </NavLink>
+            </Link>
           );
         })}
 
         <div className="pt-3 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">
           Overview
         </div>
-        <NavLink
+        <Link
           to="/"
           onClick={onNavigate}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition"
+          aria-current={isItemActive('/') ? 'page' : undefined}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+            isItemActive('/')
+              ? 'bg-teal-500/15 text-teal-300 border border-teal-500/30 font-semibold'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
+          }`}
         >
           <Cpu className="w-4 h-4 shrink-0 text-slate-400" />
           <span>About TraceMind</span>
-        </NavLink>
+        </Link>
       </nav>
 
       {/* Mock Indicator (if active) */}

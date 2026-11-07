@@ -9,6 +9,7 @@ interface TopBarProps {
 
 export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
   const location = useLocation();
+  const currentPath = location.pathname.replace(/\/$/, '') || '/';
 
   const getPageTitle = (path: string) => {
     if (path === '/dashboard') return 'Dashboard';
@@ -34,7 +35,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
         </button>
 
         <h1 className="text-sm sm:text-base font-semibold text-slate-100 tracking-tight">
-          {getPageTitle(location.pathname)}
+          {getPageTitle(currentPath)}
         </h1>
       </div>
 
@@ -44,7 +45,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
         <StatusChip />
 
         {/* Quick New Incident action */}
-        {location.pathname !== '/incidents/new' && (
+        {currentPath !== '/incidents/new' && (
           <Link
             to="/incidents/new"
             className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-semibold transition cursor-pointer"

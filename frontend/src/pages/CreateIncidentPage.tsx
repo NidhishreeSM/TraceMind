@@ -7,6 +7,7 @@ import {
   Server,
   AlertOctagon,
   Terminal,
+  ChevronDown,
 } from 'lucide-react';
 import { createIncident, extractErrorMessage } from '../api';
 import { Severity, Environment, IncidentCreateRequest } from '../types';
@@ -28,7 +29,7 @@ export const CreateIncidentPage: React.FC = () => {
   const [title, setTitle] = useState('');
   const [service, setService] = useState('');
   const [environment, setEnvironment] = useState<Environment>('production');
-  const [severity, setSeverity] = useState<Severity>('critical');
+  const [severity, setSeverity] = useState<Severity | ''>('');
   const [symptoms, setSymptoms] = useState('');
   const [errorLogs, setErrorLogs] = useState('');
 
@@ -55,6 +56,7 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
     const errors: Record<string, string> = {};
     if (!title.trim()) errors.title = 'Title is required';
     if (!service.trim()) errors.service = 'Affected service is required';
+    if (!severity) errors.severity = 'Severity level is required';
     if (!symptoms.trim()) errors.symptoms = 'Observed symptoms are required';
     if (!errorLogs.trim()) errors.errorLogs = 'Error logs or stack traces are required';
 
@@ -75,7 +77,7 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
         title: title.trim(),
         service: service.trim(),
         environment,
-        severity,
+        severity: severity as Severity,
         symptoms: symptoms.trim(),
         error_logs: errorLogs.trim(),
       };
@@ -193,24 +195,32 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
             <label htmlFor="environment" className="block text-xs font-bold uppercase tracking-wider text-slate-300">
               Deployment Environment
             </label>
-            <select
-              id="environment"
-              value={environment}
-              onChange={(e) => setEnvironment(e.target.value as Environment)}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-hidden focus:border-teal-500 transition font-mono"
-            >
-              <option value="production">Production (Live Traffic)</option>
-              <option value="staging">Staging (Pre-Release)</option>
-              <option value="development">Development / Sandbox</option>
-            </select>
+            <div className="relative">
+              <select
+                id="environment"
+                value={environment}
+                onChange={(e) => setEnvironment(e.target.value as Environment)}
+                className="w-full appearance-none px-3.5 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-hidden focus:border-teal-500 transition cursor-pointer"
+              >
+                <option value="production" className="bg-slate-950 text-slate-200">Production (Live Traffic)</option>
+                <option value="staging" className="bg-slate-950 text-slate-200">Staging (Pre-Release)</option>
+                <option value="development" className="bg-slate-950 text-slate-200">Development / Sandbox</option>
+              </select>
+              <ChevronDown className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
           </div>
         </div>
 
         {/* Severity Selector */}
         <div className="space-y-2">
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-            Severity Level <span className="text-rose-400">*</span>
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+              Severity Level <span className="text-rose-400">*</span>
+            </label>
+            {!severity && (
+              <span className="text-[11px] text-slate-400 font-mono">Please select one</span>
+            )}
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { level: 'critical', desc: 'Customer outage / Revenue risk', border: 'border-rose-500', activeBg: 'bg-rose-950/60 text-rose-200' },
@@ -221,10 +231,21 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
               <button
                 key={level}
                 type="button"
-                onClick={() => setSeverity(level as Severity)}
+                onClick={() => {
+                  setSeverity(level as Severity);
+                  if (formErrors.severity) {
+                    setFormErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.severity;
+                      return next;
+                    });
+                  }
+                }}
                 className={`p-3 rounded-xl border text-left transition cursor-pointer ${
                   severity === level
-                    ? `${border} ${activeBg} shadow-md`
+                    ? `${border} ${activeBg} shadow-md ring-1 ring-teal-500/30`
+                    : formErrors.severity
+                    ? 'border-rose-500/60 bg-slate-950/60 text-slate-400 hover:border-slate-700'
                     : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:border-slate-700'
                 }`}
               >
@@ -233,6 +254,9 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
               </button>
             ))}
           </div>
+          {formErrors.severity && (
+            <p className="text-xs text-rose-400 mt-1">{formErrors.severity}</p>
+          )}
         </div>
 
         {/* Symptoms */}
