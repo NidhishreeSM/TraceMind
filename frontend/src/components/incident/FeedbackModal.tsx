@@ -64,16 +64,16 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Guardrail Warning */}
-        <div className="p-3.5 rounded-2xl bg-[#101C3D] border border-white/10 text-[11px] text-[#8FA0BF] flex items-start gap-2.5">
-          <ShieldAlert className="w-4 h-4 text-[#C9D6EA] shrink-0 mt-0.5" />
+        <div className="p-3.5 rounded-xl bg-[#131C31] border border-white/[0.07] text-[11px] text-[#94A3B8] flex items-start gap-2.5">
+          <ShieldAlert className="w-4 h-4 text-[#3B82F6] shrink-0 mt-0.5" />
           <span>
-            <strong className="text-white">Human approval required:</strong> AI recommendations are never executed automatically. You are evaluating whether this recommendation is sound.
+            <strong className="text-[#F1F5F9]">Human approval required:</strong> AI recommendations are never executed automatically. You are evaluating whether this recommendation is sound.
           </span>
         </div>
 
-        {/* Action Type Toggle */}
+        {/* Action Type Toggle (Accept = Green, Modify = Amber, Reject = Red) */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-medium uppercase tracking-wider text-white">
+          <label className="block text-xs font-medium uppercase tracking-wider text-[#F1F5F9]">
             Feedback Assessment
           </label>
           <div className="grid grid-cols-3 gap-2">
@@ -82,8 +82,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
               onClick={() => setFeedbackType('accept')}
               className={`p-2.5 rounded-full border text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer ${
                 feedbackType === 'accept'
-                  ? 'bg-white text-[#050B1A] border-white shadow-sm'
-                  : 'bg-[#101C3D] border-white/10 text-[#8FA0BF] hover:text-white'
+                  ? 'bg-[#22C55E]/20 text-[#22C55E] border-[#22C55E]'
+                  : 'bg-[#131C31] border-white/[0.07] text-[#94A3B8] hover:text-[#F1F5F9]'
               }`}
             >
               <ThumbsUp className="w-3.5 h-3.5" />
@@ -95,8 +95,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
               onClick={() => setFeedbackType('modify')}
               className={`p-2.5 rounded-full border text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer ${
                 feedbackType === 'modify'
-                  ? 'bg-[#3B82F6] text-white border-[#3B82F6] shadow-sm'
-                  : 'bg-[#101C3D] border-white/10 text-[#8FA0BF] hover:text-white'
+                  ? 'bg-[#EAB308]/20 text-[#EAB308] border-[#EAB308]'
+                  : 'bg-[#131C31] border-white/[0.07] text-[#94A3B8] hover:text-[#F1F5F9]'
               }`}
             >
               <Edit3 className="w-3.5 h-3.5" />
@@ -108,8 +108,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
               onClick={() => setFeedbackType('reject')}
               className={`p-2.5 rounded-full border text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer ${
                 feedbackType === 'reject'
-                  ? 'bg-transparent text-white border-white shadow-sm'
-                  : 'bg-[#101C3D] border-white/10 text-[#8FA0BF] hover:text-white'
+                  ? 'bg-[#EF4444]/20 text-[#EF4444] border-[#EF4444]'
+                  : 'bg-[#131C31] border-white/[0.07] text-[#94A3B8] hover:text-[#F1F5F9]'
               }`}
             >
               <ThumbsDown className="w-3.5 h-3.5" />
@@ -121,14 +121,14 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         {/* If Modify: Modified Recommendation Input */}
         {feedbackType === 'modify' && (
           <div className="space-y-1.5">
-            <label className="block text-xs font-medium uppercase tracking-wider text-[#C9D6EA]">
+            <label className="block text-xs font-medium uppercase tracking-wider text-[#EAB308]">
               Refined Recommendation
             </label>
             <textarea
               rows={3}
               value={modifiedRec}
               onChange={(e) => setModifiedRec(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#101C3D] border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:outline-hidden focus:border-[#3B82F6]"
+              className="w-full px-3.5 py-2.5 bg-[#131C31] border border-[#EAB308]/40 rounded-xl text-xs sm:text-sm text-[#F1F5F9] focus:outline-hidden focus:border-[#EAB308]"
               placeholder="Correct the recommendation with human insight..."
               required
             />
@@ -137,7 +137,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
         {/* Notes */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-medium uppercase tracking-wider text-white">
+          <label className="block text-xs font-medium uppercase tracking-wider text-[#F1F5F9]">
             Engineer Triage Notes / Rationale
           </label>
           <textarea
@@ -151,22 +151,22 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 ? 'e.g. Recommendation would cause cascading restarts.'
                 : 'e.g. Adjusted connection pool values based on cluster headroom.'
             }
-            className="w-full px-3.5 py-2.5 bg-[#101C3D] border border-white/10 rounded-xl text-xs sm:text-sm text-white focus:outline-hidden focus:border-[#3B82F6]"
+            className="w-full px-3.5 py-2.5 bg-[#131C31] border border-white/[0.07] rounded-xl text-xs sm:text-sm text-[#F1F5F9] focus:outline-hidden focus:border-[#3B82F6]"
           />
         </div>
 
-        <div className="pt-3 border-t border-white/8 flex items-center justify-between">
+        <div className="pt-3 border-t border-white/[0.07] flex items-center justify-between">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold text-[#8FA0BF] hover:text-white"
+            className="px-4 py-2 text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9]"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-white hover:bg-[#C9D6EA] text-[#050B1A] font-semibold text-xs transition cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-white hover:bg-[#C9D6EA] text-[#080E1D] font-semibold text-xs transition cursor-pointer disabled:opacity-50"
           >
             <Send className="w-3.5 h-3.5" />
             {submitting ? 'Saving...' : 'Submit Evaluation'}

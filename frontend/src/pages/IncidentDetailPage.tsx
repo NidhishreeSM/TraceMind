@@ -201,7 +201,7 @@ export const IncidentDetailPage: React.FC = () => {
   if (error || !incident) {
     return (
       <div className="space-y-4">
-        <Link to="/incidents" className="inline-flex items-center gap-1 text-xs text-[#8FA0BF] hover:text-white">
+        <Link to="/incidents" className="inline-flex items-center gap-1 text-xs text-[#94A3B8] hover:text-[#F1F5F9]">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Incidents
         </Link>
         <ErrorBanner
@@ -227,22 +227,22 @@ export const IncidentDetailPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Top Breadcrumb & Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.07]">
         <div>
           <Link
             to="/incidents"
-            className="inline-flex items-center gap-1 text-xs text-[#8FA0BF] hover:text-white mb-2 transition"
+            className="inline-flex items-center gap-1 text-xs text-[#94A3B8] hover:text-[#F1F5F9] mb-2 transition"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Incidents
           </Link>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-mono text-base font-bold text-white">{incident.id}</span>
+            <span className="font-mono text-base font-bold text-[#F1F5F9]">{incident.id}</span>
             <SeverityBadge severity={incident.severity} />
             <StatusBadge status={incident.status} />
             <EnvironmentBadge env={incident.environment} />
             {incident.is_demo && <DemoBadge />}
           </div>
-          <h2 className="text-xl sm:text-2xl font-normal text-white tracking-wide mt-1.5">
+          <h2 className="text-xl sm:text-2xl font-normal text-[#F1F5F9] tracking-wide mt-1.5">
             {incident.title}
           </h2>
         </div>
@@ -251,14 +251,14 @@ export const IncidentDetailPage: React.FC = () => {
           {!isResolved ? (
             <button
               onClick={() => setResolveModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-white hover:bg-[#C9D6EA] text-[#050B1A] text-xs font-semibold transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-white hover:bg-[#C9D6EA] text-[#080E1D] text-xs font-semibold transition cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
               Resolve Incident
             </button>
           ) : (
-            <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#101C3D] border border-white/10 text-[#C9D6EA] text-xs font-mono">
-              <CheckCircle2 className="w-4 h-4 text-[#C9D6EA]" />
+            <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#22C55E]/15 border border-[#22C55E]/35 text-[#22C55E] text-xs font-mono">
+              <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
               Resolved & Retained
             </div>
           )}
@@ -272,98 +272,98 @@ export const IncidentDetailPage: React.FC = () => {
             ========================================================================= */}
         <div className="lg:col-span-5 space-y-6">
           {/* Incident Facts Card */}
-          <div className="p-6 rounded-3xl bg-[#0B1530] border border-white/8 space-y-4">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-white font-mono">
+          <div className="p-6 rounded-2xl bg-[#0E1628] border border-white/[0.07] space-y-4">
+            <h3 className="text-xs font-medium uppercase tracking-wider text-[#F1F5F9] font-mono">
               Incident facts
             </h3>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-2xl bg-[#101C3D] border border-white/8">
-                <span className="text-[#8FA0BF] block text-[10px] uppercase font-mono">Service</span>
-                <span className="font-mono font-bold text-white mt-0.5 block">{incident.service}</span>
+              <div className="p-3 rounded-xl bg-[#131C31] border border-white/[0.07]">
+                <span className="text-[#94A3B8] block text-[10px] uppercase font-mono">Service</span>
+                <span className="font-mono font-bold text-[#F1F5F9] mt-0.5 block">{incident.service}</span>
               </div>
-              <div className="p-3 rounded-2xl bg-[#101C3D] border border-white/8">
-                <span className="text-[#8FA0BF] block text-[10px] uppercase font-mono">Environment</span>
-                <span className="font-mono font-bold text-white mt-0.5 block capitalize">{incident.environment}</span>
+              <div className="p-3 rounded-xl bg-[#131C31] border border-white/[0.07]">
+                <span className="text-[#94A3B8] block text-[10px] uppercase font-mono">Environment</span>
+                <span className="font-mono font-bold text-[#F1F5F9] mt-0.5 block capitalize">{incident.environment}</span>
               </div>
-              <div className="p-3 rounded-2xl bg-[#101C3D] border border-white/8">
-                <span className="text-[#8FA0BF] block text-[10px] uppercase font-mono">Detected</span>
-                <span className="font-mono text-white mt-0.5 block">
+              <div className="p-3 rounded-xl bg-[#131C31] border border-white/[0.07]">
+                <span className="text-[#94A3B8] block text-[10px] uppercase font-mono">Detected</span>
+                <span className="font-mono text-[#F1F5F9] mt-0.5 block">
                   {new Date(incident.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                 </span>
               </div>
-              <div className="p-3 rounded-2xl bg-[#101C3D] border border-white/8">
-                <span className="text-[#8FA0BF] block text-[10px] uppercase font-mono">Updated</span>
-                <span className="font-mono text-white mt-0.5 block">
+              <div className="p-3 rounded-xl bg-[#131C31] border border-white/[0.07]">
+                <span className="text-[#94A3B8] block text-[10px] uppercase font-mono">Updated</span>
+                <span className="font-mono text-[#F1F5F9] mt-0.5 block">
                   {new Date(incident.updated_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                 </span>
               </div>
             </div>
 
             {/* Observed Symptoms */}
-            <div className="space-y-1.5 pt-2 border-t border-white/8">
-              <span className="text-[11px] font-mono uppercase text-[#8FA0BF]">Observed symptoms</span>
-              <p className="text-xs text-[#C9D6EA] leading-relaxed bg-[#101C3D] p-3 rounded-2xl border border-white/8">
+            <div className="space-y-1.5 pt-2 border-t border-white/[0.07]">
+              <span className="text-[11px] font-mono uppercase text-[#94A3B8]">Observed symptoms</span>
+              <p className="text-xs text-[#F1F5F9] leading-relaxed bg-[#131C31] p-3 rounded-xl border border-white/[0.07]">
                 {incident.symptoms}
               </p>
             </div>
           </div>
 
           {/* Monospace Error Logs Terminal */}
-          <div className="rounded-3xl bg-[#050B1A] border border-white/10 overflow-hidden">
-            <div className="p-3 bg-[#0B1530] border-b border-white/8 flex items-center justify-between">
+          <div className="rounded-2xl bg-[#0E1628] border border-white/[0.07] overflow-hidden">
+            <div className="p-3 bg-[#131C31] border-b border-white/[0.07] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Terminal className="w-3.5 h-3.5 text-[#C9D6EA]" />
-                <span className="text-xs font-mono font-medium text-white">Error logs</span>
+                <Terminal className="w-3.5 h-3.5 text-[#3B82F6]" />
+                <span className="text-xs font-mono font-medium text-[#F1F5F9]">Error logs</span>
               </div>
               <button
                 onClick={handleCopyLogs}
-                className="flex items-center gap-1 px-3 py-1 rounded-full border border-white/20 text-[#8FA0BF] hover:text-white text-xs font-mono transition cursor-pointer"
+                className="flex items-center gap-1 px-3 py-1 rounded-full border border-white/[0.14] text-[#94A3B8] hover:text-[#F1F5F9] text-xs font-mono transition cursor-pointer"
                 title="Copy log contents"
               >
-                {copiedLog ? <Check className="w-3 h-3 text-[#C9D6EA]" /> : <Copy className="w-3 h-3" />}
+                {copiedLog ? <Check className="w-3 h-3 text-[#22C55E]" /> : <Copy className="w-3 h-3" />}
                 {copiedLog ? 'Copied' : 'Copy'}
               </button>
             </div>
-            <pre className="p-4 font-mono text-xs text-[#C9D6EA] overflow-x-auto max-h-60 whitespace-pre-wrap leading-relaxed select-text">
+            <pre className="p-4 font-mono text-xs text-[#94A3B8] overflow-x-auto max-h-60 whitespace-pre-wrap leading-relaxed select-text bg-[#0E1628]">
               {incident.error_logs || 'No error logs recorded for this incident.'}
             </pre>
           </div>
 
           {/* Verified Resolution Post-Mortem (if resolved) */}
           {incident.resolution && (
-            <div className="p-6 rounded-3xl bg-[#0B1530] border border-white/15 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-white/8">
-                <div className="flex items-center gap-1.5 text-[#C9D6EA]">
-                  <CheckCircle2 className="w-4 h-4 text-[#3B82F6]" />
-                  <h3 className="text-xs font-medium uppercase tracking-wider font-mono text-white">
+            <div className="p-6 rounded-2xl bg-[#0E1628] border border-[#22C55E]/35 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.07]">
+                <div className="flex items-center gap-1.5 text-[#22C55E]">
+                  <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
+                  <h3 className="text-xs font-medium uppercase tracking-wider font-mono text-[#F1F5F9]">
                     Verified resolution
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#101C3D] text-[#C9D6EA] border border-white/10">
+                <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/35">
                   Retained in Hindsight
                 </span>
               </div>
 
               <div className="space-y-3 text-xs">
                 <div>
-                  <span className="text-[#8FA0BF] font-mono text-[10px] uppercase block">Confirmed cause</span>
-                  <p className="text-white mt-1 bg-[#101C3D] p-3 rounded-2xl border border-white/8">
+                  <span className="text-[#94A3B8] font-mono text-[10px] uppercase block">Confirmed cause</span>
+                  <p className="text-[#F1F5F9] mt-1 bg-[#131C31] p-3 rounded-xl border border-white/[0.07]">
                     {incident.resolution.confirmed_cause}
                   </p>
                 </div>
 
                 <div>
-                  <span className="text-[#8FA0BF] font-mono text-[10px] uppercase block">Verified fix</span>
-                  <p className="text-[#C9D6EA] mt-1 bg-[#101C3D] p-3 rounded-2xl border border-white/8 font-medium">
+                  <span className="text-[#94A3B8] font-mono text-[10px] uppercase block">Verified fix</span>
+                  <p className="text-[#F1F5F9] mt-1 bg-[#131C31] p-3 rounded-xl border border-white/[0.07] font-medium">
                     {incident.resolution.verified_resolution}
                   </p>
                 </div>
 
                 {incident.resolution.steps_taken?.length > 0 && (
                   <div>
-                    <span className="text-[#8FA0BF] font-mono text-[10px] uppercase block">Steps taken</span>
-                    <ul className="list-disc list-inside space-y-1 mt-1 text-[#C9D6EA] pl-1 font-mono text-[11px]">
+                    <span className="text-[#94A3B8] font-mono text-[10px] uppercase block">Steps taken</span>
+                    <ul className="list-disc list-inside space-y-1 mt-1 text-[#F1F5F9] pl-1 font-mono text-[11px]">
                       {incident.resolution.steps_taken.map((step, idx) => (
                         <li key={idx}>{step}</li>
                       ))}
@@ -373,8 +373,8 @@ export const IncidentDetailPage: React.FC = () => {
 
                 {incident.resolution.failed_attempts?.length > 0 && (
                   <div>
-                    <span className="text-[#8FA0BF] font-mono text-[10px] uppercase block">Failed attempts</span>
-                    <ul className="list-disc list-inside space-y-1 mt-1 text-[#8FA0BF] pl-1 font-mono text-[11px]">
+                    <span className="text-[#94A3B8] font-mono text-[10px] uppercase block">Failed attempts</span>
+                    <ul className="list-disc list-inside space-y-1 mt-1 text-[#94A3B8] pl-1 font-mono text-[11px]">
                       {incident.resolution.failed_attempts.map((attempt, idx) => (
                         <li key={idx}>{attempt}</li>
                       ))}
@@ -391,27 +391,27 @@ export const IncidentDetailPage: React.FC = () => {
             ========================================================================= */}
         <div className="lg:col-span-7 space-y-6">
           {/* Analysis Controls */}
-          <div className="p-6 rounded-3xl bg-[#0B1530] border border-white/8 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/8">
+          <div className="p-6 rounded-2xl bg-[#0E1628] border border-white/[0.07] space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.07]">
               <div>
-                <h3 className="text-base font-normal text-white flex items-center gap-2">
+                <h3 className="text-base font-normal text-[#F1F5F9] flex items-center gap-2">
                   AI Investigation
                 </h3>
-                <p className="text-xs text-[#8FA0BF] mt-0.5">
+                <p className="text-xs text-[#94A3B8] mt-0.5">
                   Analyze failure telemetry against Hindsight memory
                 </p>
               </div>
 
               {/* Memory Toggle */}
-              <div className="flex items-center gap-2 bg-[#101C3D] p-1 rounded-full border border-white/10 shrink-0">
-                <span className="text-xs font-mono text-[#8FA0BF] pl-2">Memory:</span>
+              <div className="flex items-center gap-2 bg-[#131C31] p-1 rounded-full border border-white/[0.07] shrink-0">
+                <span className="text-xs font-mono text-[#94A3B8] pl-2">Memory:</span>
                 <button
                   type="button"
                   onClick={() => setUseMemory(!useMemory)}
                   className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer ${
                     useMemory
-                      ? 'bg-white text-[#050B1A]'
-                      : 'bg-transparent text-[#8FA0BF] hover:text-white'
+                      ? 'bg-white text-[#080E1D]'
+                      : 'bg-transparent text-[#94A3B8] hover:text-[#F1F5F9]'
                   }`}
                 >
                   {useMemory ? 'With Memory (ON)' : 'Zero-Shot (OFF)'}
@@ -425,7 +425,7 @@ export const IncidentDetailPage: React.FC = () => {
                 <button
                   onClick={() => handleRunAnalysis()}
                   disabled={analyzing || runningCompare}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-[#C9D6EA] text-[#050B1A] text-xs font-semibold transition cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-[#C9D6EA] text-[#080E1D] text-xs font-semibold transition cursor-pointer disabled:opacity-50"
                 >
                   <Sparkles className={`w-3.5 h-3.5 ${analyzing ? 'animate-spin' : ''}`} />
                   {analyzing ? 'Analyzing...' : useMemory ? 'Analyze with memory' : 'Analyze without memory'}
@@ -437,17 +437,17 @@ export const IncidentDetailPage: React.FC = () => {
                   className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border text-xs font-semibold transition cursor-pointer ${
                     isCompareMode
                       ? 'bg-white/10 border-white text-white'
-                      : 'border-white/30 text-white hover:bg-white/5'
+                      : 'border-white/[0.30] text-[#F1F5F9] hover:bg-white/5'
                   }`}
                   title="Run both without-memory and with-memory analyses to compare side by side"
                 >
-                  <Columns className="w-3.5 h-3.5 text-[#C9D6EA]" />
+                  <Columns className="w-3.5 h-3.5 text-[#3B82F6]" />
                   {runningCompare ? 'Comparing...' : 'Compare mode'}
                 </button>
               </div>
 
               {currentAnalysis && (
-                <div className="text-[11px] font-mono text-[#8FA0BF] flex items-center gap-1.5">
+                <div className="text-[11px] font-mono text-[#94A3B8] flex items-center gap-1.5">
                   <span>{currentAnalysis.latency_ms}ms</span>
                   <span>·</span>
                   <span className="truncate max-w-[140px]" title={currentAnalysis.model_used}>
@@ -462,31 +462,31 @@ export const IncidentDetailPage: React.FC = () => {
               SIDE-BY-SIDE COMPARE MODE
               ========================================================================= */}
           {isCompareMode && (
-            <div className="p-6 rounded-3xl bg-[#0B1530] border border-white/8 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-white/8">
+            <div className="p-6 rounded-2xl bg-[#0E1628] border border-white/[0.07] space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.07]">
                 <div className="flex items-center gap-2">
-                  <Columns className="w-4 h-4 text-[#C9D6EA]" />
-                  <h4 className="text-xs font-medium uppercase tracking-wider text-white font-mono">
+                  <Columns className="w-4 h-4 text-[#8B5CF6]" />
+                  <h4 className="text-xs font-medium uppercase tracking-wider text-[#F1F5F9] font-mono">
                     Comparison: Without memory vs With memory
                   </h4>
                 </div>
                 <button
                   onClick={() => setIsCompareMode(false)}
-                  className="text-xs text-[#8FA0BF] hover:text-white underline cursor-pointer"
+                  className="text-xs text-[#94A3B8] hover:text-[#F1F5F9] underline cursor-pointer"
                 >
                   Close compare
                 </button>
               </div>
 
-              {/* Cited Incidents List Banner */}
+              {/* Cited Incidents List Banner (violet tone for memory citations) */}
               {citedMemoryIds.length > 0 && (
-                <div className="p-3 rounded-2xl bg-[#101C3D] border border-white/8 text-xs flex items-center gap-2 flex-wrap">
-                  <span className="text-[#8FA0BF] font-mono text-[11px]">Recalled incidents cited:</span>
+                <div className="p-3 rounded-xl bg-[#8B5CF6]/10 border border-[#8B5CF6]/35 text-xs flex items-center gap-2 flex-wrap">
+                  <span className="text-[#8B5CF6] font-mono text-[11px]">Recalled incidents cited:</span>
                   {citedMemoryIds.map((cId) => (
                     <Link
                       key={cId}
                       to={`/incidents/${cId}`}
-                      className="px-2 py-0.5 rounded-full bg-white/5 border border-white/20 text-[#C9D6EA] font-mono text-[11px] hover:underline flex items-center gap-1"
+                      className="px-2 py-0.5 rounded-full bg-[#8B5CF6]/20 border border-[#8B5CF6]/35 text-[#8B5CF6] font-mono text-[11px] hover:underline flex items-center gap-1"
                     >
                       {cId} <ExternalLink className="w-2.5 h-2.5" />
                     </Link>
@@ -495,14 +495,14 @@ export const IncidentDetailPage: React.FC = () => {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                {/* Without Memory */}
-                <div className="p-4 rounded-2xl bg-[#101C3D] border border-white/8 space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-white/8">
-                    <span className="font-mono text-xs font-medium text-[#8FA0BF] flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5" />
+                {/* Without Memory: Blue/neutral */}
+                <div className="p-4 rounded-xl bg-[#131C31] border border-white/[0.07] space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-white/[0.07]">
+                    <span className="font-mono text-xs font-medium text-[#94A3B8] flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-[#3B82F6]" />
                       Without memory
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 text-[#8FA0BF]">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 text-[#94A3B8]">
                       zero-shot
                     </span>
                   </div>
@@ -510,33 +510,33 @@ export const IncidentDetailPage: React.FC = () => {
                   {zeroShotAnalysis ? (
                     <div className="space-y-3">
                       <div>
-                        <span className="text-[10px] font-mono text-[#8FA0BF] uppercase block">Hypothesis</span>
-                        <p className="text-[#8FA0BF] mt-1 leading-relaxed">
+                        <span className="text-[10px] font-mono text-[#94A3B8] uppercase block">Hypothesis</span>
+                        <p className="text-[#94A3B8] mt-1 leading-relaxed">
                           {zeroShotAnalysis.hypotheses[0]?.description}
                         </p>
-                        <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-[#8FA0BF] font-mono">
+                        <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-[#94A3B8] font-mono">
                           Confidence: {zeroShotAnalysis.hypotheses[0]?.confidence}
                         </span>
                       </div>
 
                       <div>
-                        <span className="text-[10px] font-mono text-[#8FA0BF] uppercase block">Recommendation</span>
-                        <p className="text-[#8FA0BF] mt-1 text-xs leading-relaxed">{zeroShotAnalysis.recommendation}</p>
+                        <span className="text-[10px] font-mono text-[#94A3B8] uppercase block">Recommendation</span>
+                        <p className="text-[#94A3B8] mt-1 text-xs leading-relaxed">{zeroShotAnalysis.recommendation}</p>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-[#8FA0BF] text-xs italic">Run compare mode to populate.</p>
+                    <p className="text-[#94A3B8] text-xs italic">Run compare mode to populate.</p>
                   )}
                 </div>
 
-                {/* With Memory */}
-                <div className="p-4 rounded-2xl bg-[#101C3D] border border-[#3B82F6]/50 space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-white/8">
-                    <span className="font-mono text-xs font-semibold text-[#C9D6EA] flex items-center gap-1.5">
-                      <Brain className="w-3.5 h-3.5 text-[#3B82F6]" />
+                {/* With Memory: Violet */}
+                <div className="p-4 rounded-xl bg-[#8B5CF6]/15 border border-[#8B5CF6]/35 space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#8B5CF6]/30">
+                    <span className="font-mono text-xs font-semibold text-[#F1F5F9] flex items-center gap-1.5">
+                      <Brain className="w-3.5 h-3.5 text-[#8B5CF6]" />
                       With memory
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#3B82F6]/20 text-[#C9D6EA] border border-[#3B82F6]/30">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#8B5CF6]/20 text-[#8B5CF6] border border-[#8B5CF6]/40">
                       Hindsight
                     </span>
                   </div>
@@ -544,22 +544,22 @@ export const IncidentDetailPage: React.FC = () => {
                   {memoryAnalysis ? (
                     <div className="space-y-3">
                       <div>
-                        <span className="text-[10px] font-mono text-[#C9D6EA] uppercase block">Hypothesis</span>
-                        <p className="text-white mt-1 font-normal leading-relaxed">
+                        <span className="text-[10px] font-mono text-[#8B5CF6] uppercase block">Hypothesis</span>
+                        <p className="text-[#F1F5F9] mt-1 font-normal leading-relaxed">
                           {memoryAnalysis.hypotheses[0]?.description}
                         </p>
-                        <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-[#C9D6EA] font-mono">
+                        <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-[#F1F5F9] font-mono">
                           Confidence: {memoryAnalysis.hypotheses[0]?.confidence}
                         </span>
                       </div>
 
                       <div>
-                        <span className="text-[10px] font-mono text-[#C9D6EA] uppercase block">Recommendation</span>
-                        <p className="text-[#C9D6EA] mt-1 text-xs leading-relaxed">{memoryAnalysis.recommendation}</p>
+                        <span className="text-[10px] font-mono text-[#8B5CF6] uppercase block">Recommendation</span>
+                        <p className="text-[#F1F5F9] mt-1 text-xs leading-relaxed">{memoryAnalysis.recommendation}</p>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-[#8FA0BF] text-xs italic">Loading memory analysis...</p>
+                    <p className="text-[#94A3B8] text-xs italic">Loading memory analysis...</p>
                   )}
                 </div>
               </div>
@@ -577,15 +577,15 @@ export const IncidentDetailPage: React.FC = () => {
 
           {/* Active Analysis View */}
           {currentAnalysis ? (
-            <div className="p-6 rounded-3xl bg-[#0B1530] border border-white/8 space-y-5">
-              {/* Warnings Banner (if any) */}
+            <div className="p-6 rounded-2xl bg-[#0E1628] border border-white/[0.07] space-y-5">
+              {/* Warnings Banner (amber warning token) */}
               {currentAnalysis.warnings && currentAnalysis.warnings.length > 0 && (
-                <div className="p-3 rounded-2xl bg-[#101C3D] border border-white/20 text-[#C9D6EA] space-y-1">
-                  <div className="flex items-center gap-1.5 font-semibold text-xs text-white">
-                    <AlertTriangle className="w-3.5 h-3.5 text-[#C9D6EA]" />
+                <div className="p-3 rounded-xl bg-[#EAB308]/15 border border-[#EAB308]/35 text-[#F1F5F9] space-y-1">
+                  <div className="flex items-center gap-1.5 font-semibold text-xs text-[#EAB308]">
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#EAB308]" />
                     Notice
                   </div>
-                  <ul className="list-disc list-inside space-y-0.5 text-xs pl-1 text-[#8FA0BF]">
+                  <ul className="list-disc list-inside space-y-0.5 text-xs pl-1 text-[#94A3B8]">
                     {currentAnalysis.warnings.map((w, idx) => (
                       <li key={idx}>{w}</li>
                     ))}
@@ -594,14 +594,14 @@ export const IncidentDetailPage: React.FC = () => {
               )}
 
               {/* Guardrail Notice: Single Plain Line */}
-              <p className="text-xs text-[#8FA0BF] py-1 border-y border-white/8">
+              <p className="text-xs text-[#94A3B8] py-1 border-y border-white/[0.07]">
                 Human approval required before any change.
               </p>
 
-              {/* SECTION 2: AI HYPOTHESES */}
+              {/* SECTION 2: AI HYPOTHESES (blue/neutral) */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-medium uppercase tracking-wider text-white font-mono">
+                  <h4 className="text-xs font-medium uppercase tracking-wider text-[#F1F5F9] font-mono">
                     AI hypotheses (unconfirmed)
                   </h4>
                 </div>
@@ -610,15 +610,15 @@ export const IncidentDetailPage: React.FC = () => {
                   {currentAnalysis.hypotheses.map((hyp, index) => (
                     <div
                       key={index}
-                      className="p-4 rounded-2xl bg-[#101C3D] border border-white/8 space-y-1.5"
+                      className="p-4 rounded-xl bg-[#131C31] border border-white/[0.07] space-y-1.5"
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <p className="text-xs font-medium text-white">{hyp.description}</p>
-                        <span className="shrink-0 text-[10px] font-mono uppercase px-2 py-0.5 rounded-full border border-white/20 text-[#C9D6EA]">
+                        <p className="text-xs font-medium text-[#F1F5F9]">{hyp.description}</p>
+                        <span className="shrink-0 text-[10px] font-mono uppercase px-2 py-0.5 rounded-full border border-white/[0.14] text-[#94A3B8]">
                           {hyp.confidence}
                         </span>
                       </div>
-                      <p className="text-xs text-[#8FA0BF] leading-relaxed">{hyp.rationale}</p>
+                      <p className="text-xs text-[#94A3B8] leading-relaxed">{hyp.rationale}</p>
                     </div>
                   ))}
                 </div>
@@ -626,16 +626,16 @@ export const IncidentDetailPage: React.FC = () => {
 
               {/* Investigation Steps */}
               <div className="space-y-3">
-                <h4 className="text-xs font-medium uppercase tracking-wider text-white font-mono">
+                <h4 className="text-xs font-medium uppercase tracking-wider text-[#F1F5F9] font-mono">
                   Investigation steps
                 </h4>
                 <div className="space-y-2">
                   {currentAnalysis.investigation_steps.map((step, idx) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-2.5 p-3 rounded-2xl bg-[#101C3D] border border-white/8 text-xs text-[#C9D6EA] font-mono"
+                      className="flex items-start gap-2.5 p-3 rounded-xl bg-[#131C31] border border-white/[0.07] text-xs text-[#F1F5F9] font-mono"
                     >
-                      <span className="w-5 h-5 rounded-full bg-white/10 text-white text-[11px] flex items-center justify-center shrink-0 mt-0.5 font-sans font-bold">
+                      <span className="w-5 h-5 rounded-full bg-white/10 text-[#F1F5F9] text-[11px] flex items-center justify-center shrink-0 mt-0.5 font-sans font-bold">
                         {idx + 1}
                       </span>
                       <span className="flex-1 leading-relaxed">{step}</span>
@@ -645,64 +645,64 @@ export const IncidentDetailPage: React.FC = () => {
               </div>
 
               {/* Recommendation Card */}
-              <div className="p-5 rounded-2xl bg-[#101C3D] border border-white/10 space-y-3">
+              <div className="p-5 rounded-xl bg-[#131C31] border border-white/[0.07] space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium uppercase tracking-wider text-white font-mono">
+                  <span className="text-xs font-medium uppercase tracking-wider text-[#F1F5F9] font-mono">
                     Recommendation
                   </span>
-                  <span className="text-[10px] font-mono text-[#8FA0BF]">
+                  <span className="text-[10px] font-mono text-[#94A3B8]">
                     Awaiting human review
                   </span>
                 </div>
 
-                <p className="text-xs sm:text-sm text-white leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#F1F5F9] leading-relaxed">
                   {currentAnalysis.recommendation}
                 </p>
 
                 {currentAnalysis.uncertainty_note && (
-                  <p className="text-[11px] text-[#8FA0BF] italic pt-1 border-t border-white/8">
+                  <p className="text-[11px] text-[#94A3B8] italic pt-1 border-t border-white/[0.07]">
                     Note: {currentAnalysis.uncertainty_note}
                   </p>
                 )}
 
-                {/* Feedback Evaluation Controls */}
-                <div className="pt-3 border-t border-white/8 flex items-center justify-between gap-2">
-                  <span className="text-xs text-[#8FA0BF]">Feedback:</span>
+                {/* Feedback Evaluation Controls (Accept = Green, Modify = Amber, Reject = Red) */}
+                <div className="pt-3 border-t border-white/[0.07] flex items-center justify-between gap-2">
+                  <span className="text-xs text-[#94A3B8]">Feedback:</span>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleOpenFeedback('accept')}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/20 transition cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#22C55E]/15 hover:bg-[#22C55E]/25 text-[#22C55E] text-xs font-medium border border-[#22C55E]/35 transition cursor-pointer"
                     >
-                      <ThumbsUp className="w-3 h-3 text-[#C9D6EA]" />
+                      <ThumbsUp className="w-3 h-3 text-[#22C55E]" />
                       Accept
                     </button>
                     <button
                       onClick={() => handleOpenFeedback('modify')}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/20 transition cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAB308]/15 hover:bg-[#EAB308]/25 text-[#EAB308] text-xs font-medium border border-[#EAB308]/35 transition cursor-pointer"
                     >
-                      <Edit3 className="w-3 h-3 text-[#C9D6EA]" />
+                      <Edit3 className="w-3 h-3 text-[#EAB308]" />
                       Modify
                     </button>
                     <button
                       onClick={() => handleOpenFeedback('reject')}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/20 transition cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EF4444]/15 hover:bg-[#EF4444]/25 text-[#EF4444] text-xs font-medium border border-[#EF4444]/35 transition cursor-pointer"
                     >
-                      <ThumbsDown className="w-3 h-3 text-[#8FA0BF]" />
+                      <ThumbsDown className="w-3 h-3 text-[#EF4444]" />
                       Reject
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* SECTION 3: RECALLED FROM HINDSIGHT */}
+              {/* SECTION 3: RECALLED FROM HINDSIGHT (violet styling) */}
               {currentAnalysis.recalled_memories && currentAnalysis.recalled_memories.length > 0 ? (
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-medium uppercase tracking-wider text-white font-mono flex items-center gap-1.5">
-                      <Brain className="w-3.5 h-3.5 text-[#3B82F6]" />
+                    <h4 className="text-xs font-medium uppercase tracking-wider text-[#F1F5F9] font-mono flex items-center gap-1.5">
+                      <Brain className="w-3.5 h-3.5 text-[#8B5CF6]" />
                       Recalled from Hindsight ({Math.min(currentAnalysis.recalled_memories.length, 8)})
                     </h4>
-                    <span className="text-[10px] font-mono text-[#8FA0BF]">
+                    <span className="text-[10px] font-mono text-[#94A3B8]">
                       Bank: {bankId}
                     </span>
                   </div>
@@ -725,33 +725,33 @@ export const IncidentDetailPage: React.FC = () => {
                       return (
                         <div
                           key={mem.id || `mem-${index}`}
-                          className="p-4 rounded-2xl bg-[#101C3D] border border-white/8 space-y-2 hover:border-[#3B82F6]/40 transition"
+                          className="p-4 rounded-xl bg-[#8B5CF6]/10 border border-[#8B5CF6]/35 space-y-2 hover:border-[#8B5CF6]/60 transition"
                         >
                           <div className="flex items-center justify-between text-[11px] font-mono">
                             <div className="flex items-center gap-2">
-                              <span className="text-white font-semibold">{mem.id || `MEM-${index + 1}`}</span>
+                              <span className="text-[#F1F5F9] font-semibold">{mem.id || `MEM-${index + 1}`}</span>
                               {scoreValue && (
-                                <span className="text-[#8FA0BF]">Score: {scoreValue}</span>
+                                <span className="text-[#8B5CF6]">Score: {scoreValue}</span>
                               )}
                             </div>
                             {sourceId && (
                               <Link
                                 to={`/incidents/${sourceId}`}
-                                className="text-xs text-[#C9D6EA] hover:underline flex items-center gap-1"
+                                className="text-xs text-[#8B5CF6] hover:underline flex items-center gap-1"
                               >
                                 Source: {sourceId} <ExternalLink className="w-3 h-3" />
                               </Link>
                             )}
                           </div>
 
-                          <p className="text-xs text-white leading-relaxed">{mem.text}</p>
+                          <p className="text-xs text-[#F1F5F9] leading-relaxed">{mem.text}</p>
 
                           {mem.entities && mem.entities.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 pt-1">
                               {mem.entities.map((entity, i) => (
                                 <span
                                   key={i}
-                                  className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-white/5 border border-white/10 text-[#8FA0BF]"
+                                  className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#131C31] border border-white/[0.07] text-[#94A3B8]"
                                 >
                                   {entity}
                                 </span>
@@ -764,34 +764,40 @@ export const IncidentDetailPage: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="p-4 rounded-2xl bg-[#101C3D] border border-white/8 text-xs text-[#8FA0BF] italic">
+                <div className="p-4 rounded-xl bg-[#131C31] border border-white/[0.07] text-xs text-[#94A3B8] italic">
                   Zero memories recalled for this analysis.
                 </div>
               )}
 
               {/* Feedback History */}
               {incident.feedback && incident.feedback.length > 0 && (
-                <div className="pt-3 border-t border-white/8 space-y-2 text-xs">
-                  <h4 className="text-[11px] font-medium uppercase tracking-wider text-[#8FA0BF] font-mono">
+                <div className="pt-3 border-t border-white/[0.07] space-y-2 text-xs">
+                  <h4 className="text-[11px] font-medium uppercase tracking-wider text-[#94A3B8] font-mono">
                     Prior reviews ({incident.feedback.length})
                   </h4>
                   {incident.feedback.map((fb) => (
                     <div
                       key={fb.id}
-                      className="p-3 rounded-2xl bg-[#101C3D] border border-white/8 flex items-start justify-between gap-2"
+                      className="p-3 rounded-xl bg-[#131C31] border border-white/[0.07] flex items-start justify-between gap-2"
                     >
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono uppercase font-bold text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white">
+                          <span className={`font-mono uppercase font-bold text-[10px] px-2 py-0.5 rounded-full ${
+                            fb.feedback_type === 'accept'
+                              ? 'bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/35'
+                              : fb.feedback_type === 'modify'
+                              ? 'bg-[#EAB308]/15 text-[#EAB308] border border-[#EAB308]/35'
+                              : 'bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/35'
+                          }`}>
                             {fb.feedback_type}
                           </span>
-                          <span className="text-[#8FA0BF] text-[11px]">
+                          <span className="text-[#94A3B8] text-[11px]">
                             {new Date(fb.created_at).toLocaleTimeString()}
                           </span>
                         </div>
-                        {fb.notes && <p className="text-white text-xs mt-1">{fb.notes}</p>}
+                        {fb.notes && <p className="text-[#F1F5F9] text-xs mt-1">{fb.notes}</p>}
                         {fb.modified_recommendation && (
-                          <p className="text-[#C9D6EA] text-xs mt-1 italic">
+                          <p className="text-[#EAB308] text-xs mt-1 italic">
                             Modified: {fb.modified_recommendation}
                           </p>
                         )}
@@ -803,20 +809,20 @@ export const IncidentDetailPage: React.FC = () => {
             </div>
           ) : (
             /* Empty state when no analysis has run */
-            <div className="p-8 rounded-3xl bg-[#0B1530] border border-white/8 text-center space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#101C3D] border border-white/10 flex items-center justify-center text-[#C9D6EA] mx-auto">
+            <div className="p-8 rounded-2xl bg-[#0E1628] border border-white/[0.07] text-center space-y-4">
+              <div className="w-12 h-12 rounded-xl bg-[#131C31] border border-white/[0.07] flex items-center justify-center text-[#8B5CF6] mx-auto">
                 <Brain className="w-6 h-6" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-base font-normal text-white">No analysis run yet</h4>
-                <p className="text-xs text-[#8FA0BF] max-w-sm mx-auto leading-relaxed">
+                <h4 className="text-base font-normal text-[#F1F5F9]">No analysis run yet</h4>
+                <p className="text-xs text-[#94A3B8] max-w-sm mx-auto leading-relaxed">
                   Run Groq AI with Hindsight memory to generate hypotheses and investigate steps.
                 </p>
               </div>
               <button
                 onClick={() => handleRunAnalysis()}
                 disabled={analyzing}
-                className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-white hover:bg-[#C9D6EA] text-[#050B1A] font-semibold text-xs transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-white hover:bg-[#C9D6EA] text-[#080E1D] font-semibold text-xs transition cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 Analyze Incident

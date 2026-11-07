@@ -32,25 +32,27 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 p-4 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-200 animate-in slide-in-from-bottom-2 ${
+            className={`pointer-events-auto flex items-start gap-3 p-4 rounded-2xl border shadow-xl transition-all duration-200 animate-in slide-in-from-bottom-2 ${
               toast.type === 'error'
-                ? 'bg-[#101C3D] border-red-500/40 text-white'
-                : 'bg-[#101C3D] border-white/15 text-white'
+                ? 'bg-[#0E1628] border-[#EF4444]/35 text-[#F1F5F9]'
+                : toast.type === 'success'
+                ? 'bg-[#0E1628] border-[#22C55E]/35 text-[#F1F5F9]'
+                : 'bg-[#0E1628] border-white/[0.07] text-[#F1F5F9]'
             }`}
           >
             <div className="mt-0.5 shrink-0">
-              {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 text-white" />}
+              {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 text-[#22C55E]" />}
               {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-[#EF4444]" />}
-              {toast.type === 'warning' && <AlertTriangle className="w-5 h-5 text-[#C9D6EA]" />}
+              {toast.type === 'warning' && <AlertTriangle className="w-5 h-5 text-[#EAB308]" />}
               {toast.type === 'info' && <Info className="w-5 h-5 text-[#3B82F6]" />}
             </div>
             <div className="flex-1 min-w-0">
-              {toast.title && <div className="text-xs font-medium uppercase tracking-wider text-[#8FA0BF] mb-0.5">{toast.title}</div>}
-              <div className="text-sm leading-relaxed text-[#C9D6EA]">{toast.message}</div>
+              {toast.title && <div className="text-xs font-medium uppercase tracking-wider text-[#94A3B8] mb-0.5">{toast.title}</div>}
+              <div className="text-sm leading-relaxed text-[#F1F5F9]">{toast.message}</div>
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="shrink-0 text-[#8FA0BF] hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer"
+              className="shrink-0 text-[#94A3B8] hover:text-[#F1F5F9] p-1 rounded-lg hover:bg-white/10 transition cursor-pointer"
               aria-label="Close notification"
             >
               <X className="w-4 h-4" />

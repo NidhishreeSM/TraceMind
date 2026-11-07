@@ -11,10 +11,38 @@
   --color-silver: #c9d6ea;
   --color-muted: #8fa0bf;
   --color-text-main: #ffffff;
+
+  /* Console-only surface & semantic tokens */
+  --color-console-bg: #080e1d;
+  --color-console-sidebar: #0a1122;
+  --color-console-surface: #0e1628;
+  --color-console-surface-raised: #131c31;
+  --color-console-border: rgba(255, 255, 255, 0.07);
+  --color-console-border-hover: rgba(255, 255, 255, 0.14);
+  --color-console-text-primary: #f1f5f9;
+  --color-console-text-secondary: #94a3b8;
+  --color-console-text-disabled: #64748b;
+
+  --color-sem-success: #22c55e;
+  --color-sem-danger: #ef4444;
+  --color-sem-high: #f97316;
+  --color-sem-warning: #eab308;
+  --color-sem-memory: #8b5cf6;
+  --color-sem-info: #3b82f6;
+  --color-sem-muted: #94a3b8;
 }
 
 :root {
   color-scheme: dark;
+  --console-bg: #080e1d;
+  --console-sidebar: #0a1122;
+  --console-surface: #0e1628;
+  --console-surface-raised: #131c31;
+  --console-border: rgba(255, 255, 255, 0.07);
+  --console-border-hover: rgba(255, 255, 255, 0.14);
+  --console-text-primary: #f1f5f9;
+  --console-text-secondary: #94a3b8;
+  --console-text-disabled: #64748b;
 }
 
 body {
@@ -27,19 +55,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar matching dark navy surface */
+/* Custom scrollbar matching console surface */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #050b1a;
+  background: #080e1d;
 }
 ::-webkit-scrollbar-thumb {
-  background: #101c3d;
+  background: #131c31;
   border-radius: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #192b59;
+  background: #1e293b;
 }
