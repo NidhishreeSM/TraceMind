@@ -6,6 +6,7 @@ import {
   RefreshCw,
   ChevronRight,
   SlidersHorizontal,
+  Info,
 } from 'lucide-react';
 import { getIncidents, extractErrorMessage } from '../api';
 import { Incident, Status, Severity } from '../types';
@@ -77,7 +78,6 @@ export const IncidentsListPage: React.FC = () => {
     };
   }, [statusFilter, severityFilter, serviceFilter, searchQuery, demoOnlyFilter]);
 
-  // Client-side debounce on search query or form submit
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     fetchIncidents();
@@ -99,23 +99,27 @@ export const IncidentsListPage: React.FC = () => {
     demoOnlyFilter !== null;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
-      {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-5 animate-in fade-in duration-200">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight">
-            Incident Registry
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">
+            Incidents
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-            Real-time feed of all active anomalies, critical triage issues, and verified resolutions.
+            Active and resolved system anomalies across services.
           </p>
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1.5">
+            <Info className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span>Seeded incidents (<span className="font-mono text-slate-300">INC-DEMO-*</span>) are synthetic benchmark records.</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => fetchIncidents(true)}
             disabled={loading}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700 transition cursor-pointer"
+            className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700 transition cursor-pointer"
             title="Refresh list"
             aria-label="Refresh incident list"
           >
@@ -123,26 +127,26 @@ export const IncidentsListPage: React.FC = () => {
           </button>
           <Link
             to="/incidents/new"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-bold shadow-lg shadow-teal-950/40 transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-semibold transition cursor-pointer"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             Declare Incident
           </Link>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800/80 shadow-md space-y-3">
-        <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3">
+      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+        <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-2.5">
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by incident ID, title, symptoms, or error..."
+              placeholder="Search by ID, title, symptoms, or logs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-hidden focus:border-teal-500 transition"
+              className="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-hidden focus:border-teal-500 transition"
             />
           </div>
 
@@ -153,29 +157,29 @@ export const IncidentsListPage: React.FC = () => {
               placeholder="Filter by service..."
               value={serviceFilter}
               onChange={(e) => setServiceFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-hidden focus:border-teal-500 transition"
+              className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-hidden focus:border-teal-500 transition"
             />
           </div>
 
           <button
             type="submit"
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium transition cursor-pointer"
+            className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium transition cursor-pointer"
           >
-            Apply Filter
+            Filter
           </button>
         </form>
 
         {/* Quick Filter Pills */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800/60 text-xs">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-slate-400 flex items-center gap-1 font-mono text-[11px]">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-slate-800/60 text-xs">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-slate-400 flex items-center gap-1 text-[11px] font-mono mr-1">
               <SlidersHorizontal className="w-3 h-3" /> Status:
             </span>
             {['all', 'open', 'investigating', 'resolved'].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-2.5 py-1 rounded-lg capitalize font-medium transition cursor-pointer ${
+                className={`px-2 py-0.5 rounded capitalize text-xs font-medium transition cursor-pointer ${
                   statusFilter === st
                     ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
                     : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200'
@@ -185,16 +189,16 @@ export const IncidentsListPage: React.FC = () => {
               </button>
             ))}
 
-            <span className="text-slate-600 mx-1">|</span>
+            <span className="text-slate-700 mx-1">|</span>
 
-            <span className="text-slate-400 flex items-center gap-1 font-mono text-[11px]">
+            <span className="text-slate-400 flex items-center gap-1 text-[11px] font-mono mr-1">
               Severity:
             </span>
             {['all', 'critical', 'high', 'medium', 'low'].map((sev) => (
               <button
                 key={sev}
                 onClick={() => setSeverityFilter(sev)}
-                className={`px-2.5 py-1 rounded-lg capitalize font-medium transition cursor-pointer ${
+                className={`px-2 py-0.5 rounded capitalize text-xs font-medium transition cursor-pointer ${
                   severityFilter === sev
                     ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
                     : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200'
@@ -237,18 +241,18 @@ export const IncidentsListPage: React.FC = () => {
       )}
 
       {!loading && !error && incidents.length > 0 && (
-        <div className="rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs sm:text-sm">
+        <div className="rounded-xl bg-slate-900 border border-slate-800 overflow-hidden">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left border-collapse text-xs sm:text-sm min-w-[850px]">
               <thead>
                 <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Incident ID</th>
-                  <th className="py-3.5 px-4">Severity</th>
-                  <th className="py-3.5 px-4">Title & Symptoms</th>
-                  <th className="py-3.5 px-4">Service</th>
-                  <th className="py-3.5 px-4">Status</th>
-                  <th className="py-3.5 px-4">Occurred</th>
-                  <th className="py-3.5 px-4 text-right">Action</th>
+                  <th className="py-2.5 px-3 min-w-[130px]">Incident ID</th>
+                  <th className="py-2.5 px-3 min-w-[100px]">Severity</th>
+                  <th className="py-2.5 px-3 min-w-[260px]">Title & Symptoms</th>
+                  <th className="py-2.5 px-3 min-w-[150px]">Service</th>
+                  <th className="py-2.5 px-3 min-w-[110px]">Status</th>
+                  <th className="py-2.5 px-3 min-w-[160px] whitespace-nowrap">Occurred</th>
+                  <th className="py-2.5 px-3 min-w-[90px] text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
@@ -259,7 +263,7 @@ export const IncidentsListPage: React.FC = () => {
                     onClick={() => window.location.assign(`/incidents/${incident.id}`)}
                   >
                     {/* ID */}
-                    <td className="py-3.5 px-4 font-mono font-bold text-teal-400 whitespace-nowrap">
+                    <td className="py-2.5 px-3 font-mono font-bold text-teal-400 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <Link
                           to={`/incidents/${incident.id}`}
@@ -273,24 +277,30 @@ export const IncidentsListPage: React.FC = () => {
                     </td>
 
                     {/* Severity */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
+                    <td className="py-2.5 px-3 whitespace-nowrap">
                       <SeverityBadge severity={incident.severity} />
                     </td>
 
                     {/* Title */}
-                    <td className="py-3.5 px-4 max-w-md">
-                      <div className="font-medium text-slate-200 group-hover:text-white transition truncate">
+                    <td className="py-2.5 px-3 max-w-sm">
+                      <div
+                        className="font-medium text-slate-200 group-hover:text-white transition truncate"
+                        title={incident.title}
+                      >
                         {incident.title}
                       </div>
-                      <div className="text-xs text-slate-400 truncate mt-0.5">
+                      <div
+                        className="text-xs text-slate-400 truncate mt-0.5"
+                        title={incident.symptoms}
+                      >
                         {incident.symptoms}
                       </div>
                     </td>
 
                     {/* Service & Env */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
+                    <td className="py-2.5 px-3 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-xs text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+                        <span className="font-mono text-xs text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">
                           {incident.service}
                         </span>
                         <EnvironmentBadge env={incident.environment} />
@@ -298,13 +308,13 @@ export const IncidentsListPage: React.FC = () => {
                     </td>
 
                     {/* Status */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
+                    <td className="py-2.5 px-3 whitespace-nowrap">
                       <StatusBadge status={incident.status} />
                     </td>
 
-                    {/* Created At */}
-                    <td className="py-3.5 px-4 whitespace-nowrap font-mono text-xs text-slate-400">
-                      <span title={new Date(incident.created_at).toLocaleString()}>
+                    {/* Created At / Occurred */}
+                    <td className="py-2.5 px-3 whitespace-nowrap font-mono text-xs text-slate-400">
+                      <span title={new Date(incident.created_at).toISOString()}>
                         {new Date(incident.created_at).toLocaleDateString()}{' '}
                         {new Date(incident.created_at).toLocaleTimeString([], {
                           hour: '2-digit',
@@ -314,7 +324,7 @@ export const IncidentsListPage: React.FC = () => {
                     </td>
 
                     {/* Action link */}
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                    <td className="py-2.5 px-3 text-right whitespace-nowrap">
                       <Link
                         to={`/incidents/${incident.id}`}
                         onClick={(e) => e.stopPropagation()}
@@ -330,9 +340,8 @@ export const IncidentsListPage: React.FC = () => {
           </div>
 
           {/* Table Footer info */}
-          <div className="p-4 border-t border-slate-800/80 bg-slate-950/40 flex items-center justify-between text-xs text-slate-400">
+          <div className="p-3 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between text-xs text-slate-400">
             <span>Showing {incidents.length} recorded incident(s)</span>
-            <span className="font-mono">TraceMind Incident DB v1</span>
           </div>
         </div>
       )}
