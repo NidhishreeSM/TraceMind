@@ -9,7 +9,6 @@ import {
   Terminal,
   Copy,
   Check,
-  ShieldAlert,
   AlertTriangle,
   ThumbsUp,
   ThumbsDown,
@@ -47,7 +46,7 @@ export const IncidentDetailPage: React.FC = () => {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [currentAnalysis, setCurrentAnalysis] = useState<Analysis | null>(null);
 
-  // Compare mode state: holds both without-memory and with-memory analyses side by side
+  // Compare mode state
   const [isCompareMode, setIsCompareMode] = useState<boolean>(false);
   const [zeroShotAnalysis, setZeroShotAnalysis] = useState<Analysis | null>(null);
   const [memoryAnalysis, setMemoryAnalysis] = useState<Analysis | null>(null);
@@ -69,7 +68,6 @@ export const IncidentDetailPage: React.FC = () => {
       const data = await getIncident(id);
       setIncident(data);
 
-      // Default current analysis to latest if available
       if (data.analyses && data.analyses.length > 0) {
         const latest = data.analyses[data.analyses.length - 1];
         setCurrentAnalysis(latest);
@@ -122,16 +120,14 @@ export const IncidentDetailPage: React.FC = () => {
     };
   }, [id]);
 
-  // Copy logs helper
   const handleCopyLogs = () => {
     if (!incident?.error_logs) return;
     navigator.clipboard.writeText(incident.error_logs);
     setCopiedLog(true);
     setTimeout(() => setCopiedLog(false), 2000);
-    toast.info('Error logs copied to clipboard.');
+    toast.info('Logs copied to clipboard.');
   };
 
-  // Run single analysis
   const handleRunAnalysis = async (overrideMemory?: boolean) => {
     if (!id) return;
     const memoryFlag = overrideMemory !== undefined ? overrideMemory : useMemory;
@@ -147,14 +143,10 @@ export const IncidentDetailPage: React.FC = () => {
         setZeroShotAnalysis(result);
       }
 
-      // Also refresh incident in background to update status to 'investigating' if was 'open'
       getIncident(id).then((fresh) => setIncident(fresh)).catch(() => {});
-
       toast.success(
-        memoryFlag
-          ? `Analysis generated with ${result.recalled_memories?.length || 0} Hindsight memory pattern(s)!`
-          : 'Zero-shot analysis generated (without institutional memory).',
-        'AI Reasoning Complete'
+        memoryFlag ? 'Analysis generated with Hindsight memory.' : 'Zero-shot analysis generated.',
+        'Analysis Complete'
       );
     } catch (err) {
       const friendlyMsg = extractErrorMessage(err);
@@ -165,14 +157,12 @@ export const IncidentDetailPage: React.FC = () => {
     }
   };
 
-  // Run side-by-side compare mode for judges
   const handleRunCompareMode = async () => {
     if (!id) return;
     try {
       setRunningCompare(true);
       setAnalysisError(null);
       setIsCompareMode(true);
-      toast.info('Running side-by-side benchmark: Without Memory vs With Memory...', 'Benchmark Started');
 
       const [withoutMem, withMem] = await Promise.all([
         analyzeIncident(id, { use_memory: false }),
@@ -183,10 +173,8 @@ export const IncidentDetailPage: React.FC = () => {
       setMemoryAnalysis(withMem);
       setCurrentAnalysis(withMem);
 
-      // Refresh incident state
       getIncident(id).then((fresh) => setIncident(fresh)).catch(() => {});
-
-      toast.success('Benchmark complete! Compare the confidence and specificity below.', 'Compare Ready');
+      toast.success('Compare benchmark complete.', 'Compare Ready');
     } catch (err) {
       const friendlyMsg = extractErrorMessage(err);
       setAnalysisError(friendlyMsg);
@@ -196,7 +184,6 @@ export const IncidentDetailPage: React.FC = () => {
     }
   };
 
-  // Open feedback modal
   const handleOpenFeedback = (type: FeedbackType) => {
     setFeedbackType(type);
     setFeedbackModalOpen(true);
@@ -228,145 +215,155 @@ export const IncidentDetailPage: React.FC = () => {
 
   const isResolved = incident.status === 'resolved';
 
+  // Helper: extract cited incident IDs from recalled memories
+  const citedMemoryIds = Array.from(
+    new Set(
+      (memoryAnalysis?.recalled_memories || [])
+        .map((m) => m.source_incident_id || (m.metadata?.incident_id as string) || m.text.match(/INC-[\w-]+/)?.[0])
+        .filter(Boolean)
+    )
+  );
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      {/* Top Breadcrumb & Quick Actions Header */}
+      {/* Top Breadcrumb & Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
           <Link
             to="/incidents"
-            className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 mb-2 transition"
+            className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 mb-1.5 transition"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Registry
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Incidents
           </Link>
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <span className="font-mono text-base font-black text-teal-400">{incident.id}</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-mono text-base font-bold text-teal-400">{incident.id}</span>
             <SeverityBadge severity={incident.severity} />
             <StatusBadge status={incident.status} />
             <EnvironmentBadge env={incident.environment} />
             {incident.is_demo && <DemoBadge />}
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight mt-1.5">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight mt-1">
             {incident.title}
           </h2>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          {/* Resolve Incident Action */}
           {!isResolved ? (
             <button
               onClick={() => setResolveModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-950/40 transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
-              Resolve & Retain in Memory
+              Resolve Incident
             </button>
           ) : (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-mono">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/70 border border-emerald-500/30 text-emerald-300 text-xs font-mono">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              Resolved & Retained in Hindsight
+              Resolved & Retained
             </div>
           )}
         </div>
       </div>
 
-      {/* Main Split Grid: Left = Info & Logs; Right = AI Analysis Hero Panel */}
+      {/* Main Grid: Left Column = Incident Facts & Logs; Right Column = AI Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* =========================================================================
-            LEFT COLUMN (5 cols): Incident Details, Symptoms, Error Logs & Resolution
+            SECTION 1: INCIDENT FACTS (Left Column - 5 cols)
             ========================================================================= */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Telemetry Card */}
-          <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-              Incident Metadata
+        <div className="lg:col-span-5 space-y-5">
+          {/* Incident Facts Card */}
+          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300 font-mono">
+              Incident facts
             </h3>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <span className="text-slate-500 block text-[10px] uppercase font-mono">Target Service</span>
+            <div className="grid grid-cols-2 gap-2.5 text-xs">
+              <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                <span className="text-slate-500 block text-[10px] uppercase font-mono">Service</span>
                 <span className="font-mono font-bold text-slate-200 mt-0.5 block">{incident.service}</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
+              <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
                 <span className="text-slate-500 block text-[10px] uppercase font-mono">Environment</span>
                 <span className="font-mono font-bold text-slate-200 mt-0.5 block capitalize">{incident.environment}</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <span className="text-slate-500 block text-[10px] uppercase font-mono">Detected At</span>
+              <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                <span className="text-slate-500 block text-[10px] uppercase font-mono">Detected</span>
                 <span className="font-mono text-slate-300 mt-0.5 block">
                   {new Date(incident.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                 </span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                <span className="text-slate-500 block text-[10px] uppercase font-mono">Last Activity</span>
+              <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                <span className="text-slate-500 block text-[10px] uppercase font-mono">Updated</span>
                 <span className="font-mono text-slate-300 mt-0.5 block">
                   {new Date(incident.updated_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                 </span>
               </div>
             </div>
 
-            {/* Symptoms */}
-            <div className="space-y-1.5 pt-2 border-t border-slate-800">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Observed Symptoms</span>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+            {/* Observed Symptoms */}
+            <div className="space-y-1 pt-2 border-t border-slate-800">
+              <span className="text-[11px] font-mono uppercase text-slate-400">Observed symptoms</span>
+              <p className="text-xs text-slate-300 leading-relaxed bg-slate-950 p-2.5 rounded-lg border border-slate-800">
                 {incident.symptoms}
               </p>
             </div>
           </div>
 
           {/* Monospace Error Logs Terminal */}
-          <div className="rounded-2xl bg-slate-950 border border-slate-800 shadow-xl overflow-hidden">
-            <div className="p-3 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+          <div className="rounded-xl bg-slate-950 border border-slate-800 overflow-hidden">
+            <div className="p-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-teal-400" />
-                <span className="text-xs font-mono font-bold text-slate-300">Error Telemetry / Logs</span>
+                <Terminal className="w-3.5 h-3.5 text-teal-400" />
+                <span className="text-xs font-mono font-medium text-slate-300">Error logs</span>
               </div>
               <button
                 onClick={handleCopyLogs}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono transition cursor-pointer"
+                className="flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono transition cursor-pointer"
                 title="Copy log contents"
               >
-                {copiedLog ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                {copiedLog ? 'Copied' : 'Copy Logs'}
+                {copiedLog ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                {copiedLog ? 'Copied' : 'Copy'}
               </button>
             </div>
-            <pre className="p-4 font-mono text-xs text-teal-300/90 overflow-x-auto max-h-64 whitespace-pre-wrap leading-relaxed select-text">
-              {incident.error_logs || 'No error logs captured for this incident.'}
+            <pre className="p-3 font-mono text-xs text-teal-300/90 overflow-x-auto max-h-60 whitespace-pre-wrap leading-relaxed select-text">
+              {incident.error_logs || 'No error logs recorded for this incident.'}
             </pre>
           </div>
 
-          {/* Verified Resolution Card (if resolved) */}
+          {/* Verified Resolution Post-Mortem (if resolved) */}
           {incident.resolution && (
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/40 shadow-xl space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <div className="flex items-center gap-2 text-emerald-400">
-                  <CheckCircle2 className="w-5 h-5" />
-                  <h3 className="text-sm font-bold text-slate-100">Verified Resolution & Post-Mortem</h3>
+            <div className="p-4 rounded-xl bg-slate-900 border border-emerald-500/30 space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                <div className="flex items-center gap-1.5 text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <h3 className="text-xs font-semibold uppercase tracking-wider font-mono text-slate-200">
+                    Verified resolution
+                  </h3>
                 </div>
-                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-300">
-                  Retained in Hindsight • Doc {incident.id}
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30">
+                  Retained in Hindsight
                 </span>
               </div>
 
-              <div className="space-y-3 text-xs">
+              <div className="space-y-2.5 text-xs">
                 <div>
-                  <span className="text-slate-400 uppercase font-mono text-[10px] block">Confirmed Cause</span>
-                  <p className="text-slate-200 font-medium mt-0.5 bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+                  <span className="text-slate-400 font-mono text-[10px] uppercase block">Confirmed cause</span>
+                  <p className="text-slate-200 mt-0.5 bg-slate-950 p-2 rounded border border-slate-800">
                     {incident.resolution.confirmed_cause}
                   </p>
                 </div>
 
                 <div>
-                  <span className="text-slate-400 uppercase font-mono text-[10px] block">Verified Resolution</span>
-                  <p className="text-emerald-300 font-medium mt-0.5 bg-emerald-950/30 p-2.5 rounded-lg border border-emerald-500/30">
+                  <span className="text-slate-400 font-mono text-[10px] uppercase block">Verified fix</span>
+                  <p className="text-emerald-300 mt-0.5 bg-slate-950 p-2 rounded border border-slate-800">
                     {incident.resolution.verified_resolution}
                   </p>
                 </div>
 
                 {incident.resolution.steps_taken?.length > 0 && (
                   <div>
-                    <span className="text-slate-400 uppercase font-mono text-[10px] block">Steps Taken</span>
-                    <ul className="list-disc list-inside space-y-1 mt-1 text-slate-300 pl-1">
+                    <span className="text-slate-400 font-mono text-[10px] uppercase block">Steps taken</span>
+                    <ul className="list-disc list-inside space-y-0.5 mt-0.5 text-slate-300 pl-1 font-mono text-[11px]">
                       {incident.resolution.steps_taken.map((step, idx) => (
                         <li key={idx}>{step}</li>
                       ))}
@@ -376,19 +373,12 @@ export const IncidentDetailPage: React.FC = () => {
 
                 {incident.resolution.failed_attempts?.length > 0 && (
                   <div>
-                    <span className="text-amber-400 uppercase font-mono text-[10px] block">Failed Attempts (Lessons)</span>
-                    <ul className="list-disc list-inside space-y-1 mt-1 text-slate-400 pl-1">
+                    <span className="text-amber-400 font-mono text-[10px] uppercase block">Failed attempts</span>
+                    <ul className="list-disc list-inside space-y-0.5 mt-0.5 text-slate-400 pl-1 font-mono text-[11px]">
                       {incident.resolution.failed_attempts.map((attempt, idx) => (
-                        <li key={idx} className="italic text-amber-300/80">{attempt}</li>
+                        <li key={idx}>{attempt}</li>
                       ))}
                     </ul>
-                  </div>
-                )}
-
-                {incident.resolution.outcome && (
-                  <div>
-                    <span className="text-slate-400 uppercase font-mono text-[10px] block">Outcome</span>
-                    <p className="text-slate-300 mt-0.5">{incident.resolution.outcome}</p>
                   </div>
                 )}
               </div>
@@ -397,80 +387,70 @@ export const IncidentDetailPage: React.FC = () => {
         </div>
 
         {/* =========================================================================
-            RIGHT COLUMN (7 cols): AI Analysis Hero Panel (With/Without Memory & Compare)
+            SECTION 2 & 3: AI HYPOTHESES & RECALLED MEMORY (Right Column - 7 cols)
             ========================================================================= */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* AI Panel Header & Control Bar */}
-          <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
+        <div className="lg:col-span-7 space-y-5">
+          {/* Analysis Controls */}
+          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
-                  <Brain className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                    AI Incident Intelligence
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-950 border border-teal-700/60 text-teal-300">
-                      Groq + Hindsight
-                    </span>
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    Autonomous reasoning grounded in verified organizational memory.
-                  </p>
-                </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
+                  AI Investigation
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Analyze failure telemetry against Hindsight memory
+                </p>
               </div>
 
-              {/* Memory Mode Toggle */}
-              <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800 shrink-0">
-                <span className="text-xs font-mono text-slate-400 pl-1.5">Memory:</span>
+              {/* Memory Toggle */}
+              <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0">
+                <span className="text-xs font-mono text-slate-400 pl-1">Memory:</span>
                 <button
                   type="button"
                   onClick={() => setUseMemory(!useMemory)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-2.5 py-1 rounded text-xs font-semibold transition cursor-pointer ${
                     useMemory
-                      ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-950/50'
+                      ? 'bg-teal-500 text-slate-950'
                       : 'bg-slate-800 text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
                   {useMemory ? 'With Memory (ON)' : 'Zero-Shot (OFF)'}
                 </button>
               </div>
             </div>
 
-            {/* Analysis Action Buttons */}
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleRunAnalysis()}
                   disabled={analyzing || runningCompare}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-bold shadow-md shadow-teal-950/40 transition cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-semibold transition cursor-pointer disabled:opacity-50"
                 >
-                  <Sparkles className={`w-4 h-4 ${analyzing ? 'animate-spin' : ''}`} />
-                  {analyzing ? 'Reasoning...' : useMemory ? 'Analyze with Memory' : 'Run Zero-Shot Analysis'}
+                  <Sparkles className={`w-3.5 h-3.5 ${analyzing ? 'animate-spin' : ''}`} />
+                  {analyzing ? 'Analyzing...' : useMemory ? 'Analyze with memory' : 'Analyze without memory'}
                 </button>
 
-                {/* Compare Mode Button for Judges */}
                 <button
                   onClick={handleRunCompareMode}
                   disabled={analyzing || runningCompare}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition cursor-pointer ${
                     isCompareMode
-                      ? 'bg-purple-950/70 border-purple-500 text-purple-200'
+                      ? 'bg-slate-800 border-teal-500 text-teal-300'
                       : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
                   }`}
-                  title="Run both zero-shot and memory analyses simultaneously to demonstrate the difference for judges"
+                  title="Run both without-memory and with-memory analyses to compare side by side"
                 >
-                  <Columns className="w-3.5 h-3.5 text-purple-400" />
-                  {runningCompare ? 'Benchmarking...' : 'Side-by-Side Compare Mode'}
+                  <Columns className="w-3.5 h-3.5 text-teal-400" />
+                  {runningCompare ? 'Comparing...' : 'Compare mode'}
                 </button>
               </div>
 
               {currentAnalysis && (
-                <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2">
-                  <span>Latency: {currentAnalysis.latency_ms}ms</span>
-                  <span>|</span>
-                  <span className="truncate max-w-[120px]" title={currentAnalysis.model_used}>
+                <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
+                  <span>{currentAnalysis.latency_ms}ms</span>
+                  <span>·</span>
+                  <span className="truncate max-w-[140px]" title={currentAnalysis.model_used}>
                     {currentAnalysis.model_used}
                   </span>
                 </div>
@@ -479,151 +459,133 @@ export const IncidentDetailPage: React.FC = () => {
           </div>
 
           {/* =========================================================================
-              SIDE-BY-SIDE COMPARE MODE (HERO DEMO DISPLAY)
+              SIDE-BY-SIDE COMPARE MODE
               ========================================================================= */}
           {isCompareMode && (
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-purple-950/30 border border-purple-500/40 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
                 <div className="flex items-center gap-2">
-                  <Columns className="w-4 h-4 text-purple-400" />
-                  <h4 className="text-sm font-bold text-slate-100">
-                    Institutional Memory Benchmark (Side-by-Side)
+                  <Columns className="w-4 h-4 text-teal-400" />
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-200 font-mono">
+                    Comparison: Without memory vs With memory
                   </h4>
                 </div>
                 <button
                   onClick={() => setIsCompareMode(false)}
                   className="text-xs text-slate-400 hover:text-slate-200 underline"
                 >
-                  Exit Compare View
+                  Close compare
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                {/* Column 1: Without Memory (Zero-Shot) */}
-                <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs uppercase font-bold text-slate-400 flex items-center gap-1.5">
+              {/* Cited Incidents List Banner */}
+              {citedMemoryIds.length > 0 && (
+                <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-xs flex items-center gap-2 flex-wrap">
+                  <span className="text-slate-400 font-mono text-[11px]">Recalled incidents cited:</span>
+                  {citedMemoryIds.map((cId) => (
+                    <Link
+                      key={cId}
+                      to={`/incidents/${cId}`}
+                      className="px-1.5 py-0.5 rounded bg-teal-950/80 border border-teal-500/40 text-teal-300 font-mono text-[11px] hover:underline flex items-center gap-1"
+                    >
+                      {cId} <ExternalLink className="w-2.5 h-2.5" />
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                {/* Without Memory */}
+                <div className="p-3.5 rounded-lg bg-slate-950 border border-slate-800 space-y-2.5">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-800/80">
+                    <span className="font-mono text-xs font-bold text-slate-400 flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5" />
-                      Without Memory (Zero-Shot)
+                      Without memory
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">
-                      Isolated LLM
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
+                      zero-shot
                     </span>
                   </div>
 
                   {zeroShotAnalysis ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <div>
                         <span className="text-[10px] font-mono text-slate-500 uppercase block">Hypothesis</span>
-                        <p className="text-slate-300 font-medium mt-0.5">
+                        <p className="text-slate-300 mt-0.5">
                           {zeroShotAnalysis.hypotheses[0]?.description}
                         </p>
-                        <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded bg-blue-950/80 text-blue-300 border border-blue-500/40 font-mono">
+                        <span className="inline-block mt-1 text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-mono">
                           Confidence: {zeroShotAnalysis.hypotheses[0]?.confidence}
                         </span>
                       </div>
 
                       <div>
-                        <span className="text-[10px] font-mono text-slate-500 uppercase block">Investigation Steps</span>
-                        <ul className="list-disc list-inside space-y-1 text-slate-400 mt-1">
-                          {zeroShotAnalysis.investigation_steps.slice(0, 2).map((s, i) => (
-                            <li key={i}>{s}</li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
                         <span className="text-[10px] font-mono text-slate-500 uppercase block">Recommendation</span>
-                        <p className="text-slate-300 mt-0.5">{zeroShotAnalysis.recommendation}</p>
-                      </div>
-
-                      <div className="text-[11px] text-rose-400/90 italic">
-                        Notice: Generic trial-and-error advice; does not pinpoint the connection leak.
+                        <p className="text-slate-300 mt-0.5 text-xs">{zeroShotAnalysis.recommendation}</p>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-slate-500 italic">Click "Side-by-Side Compare Mode" to populate.</p>
+                    <p className="text-slate-500 text-xs italic">Run compare mode to populate.</p>
                   )}
                 </div>
 
-                {/* Column 2: With Hindsight Memory */}
-                <div className="p-4 rounded-xl bg-teal-950/30 border border-teal-500/50 space-y-3 shadow-inner">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs uppercase font-bold text-teal-300 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-teal-400" />
-                      With Hindsight Memory
+                {/* With Memory */}
+                <div className="p-3.5 rounded-lg bg-slate-950 border border-teal-500/40 space-y-2.5">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-800/80">
+                    <span className="font-mono text-xs font-bold text-teal-300 flex items-center gap-1">
+                      <Brain className="w-3.5 h-3.5 text-teal-400" />
+                      With memory
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-900/80 text-teal-300 border border-teal-500/40">
-                      Grounded in Bank
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-teal-950 text-teal-300 border border-teal-500/30">
+                      Hindsight
                     </span>
                   </div>
 
                   {memoryAnalysis ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <div>
-                        <span className="text-[10px] font-mono text-teal-400/80 uppercase block">Pinpointed Root Cause</span>
-                        <p className="text-teal-200 font-medium mt-0.5">
+                        <span className="text-[10px] font-mono text-teal-400 uppercase block">Hypothesis</span>
+                        <p className="text-slate-200 mt-0.5 font-medium">
                           {memoryAnalysis.hypotheses[0]?.description}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/40 font-mono font-bold">
-                            Confidence: {memoryAnalysis.hypotheses[0]?.confidence}
-                          </span>
-                          <span className="text-[10px] text-teal-400 font-mono">
-                            Recalled from {memoryAnalysis.recalled_memories?.[0]?.metadata?.incident_id || 'Past Outages'}
-                          </span>
-                        </div>
+                        <span className="inline-block mt-1 text-[10px] px-1.5 py-0.2 rounded bg-teal-950 text-teal-300 border border-teal-500/30 font-mono">
+                          Confidence: {memoryAnalysis.hypotheses[0]?.confidence}
+                        </span>
                       </div>
 
                       <div>
-                        <span className="text-[10px] font-mono text-teal-400/80 uppercase block">Targeted Steps</span>
-                        <ul className="list-disc list-inside space-y-1 text-slate-200 mt-1">
-                          {memoryAnalysis.investigation_steps.slice(0, 2).map((s, i) => (
-                            <li key={i}>{s}</li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="p-2.5 rounded-lg bg-teal-950/60 border border-teal-500/40">
-                        <span className="text-[10px] font-mono text-teal-400/80 uppercase block">Verified Fix</span>
-                        <p className="text-teal-200 mt-0.5 font-medium">{memoryAnalysis.recommendation}</p>
-                      </div>
-
-                      <div className="text-[11px] text-emerald-300 font-semibold flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        Institutional memory targets confirmed root cause directly.
+                        <span className="text-[10px] font-mono text-teal-400 uppercase block">Recommendation</span>
+                        <p className="text-teal-200 mt-0.5 text-xs">{memoryAnalysis.recommendation}</p>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-teal-400/60 italic">Loading memory reasoning...</p>
+                    <p className="text-slate-500 text-xs italic">Loading memory analysis...</p>
                   )}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Error Banner for reasoning / service failure */}
+          {/* Analysis Error Advisory */}
           {analysisError && (
             <ErrorBanner
-              title="AI Incident Reasoning Advisory"
+              title="Analysis Advisory"
               message={analysisError}
               onRetry={() => handleRunAnalysis()}
             />
           )}
 
-          {/* =========================================================================
-              STANDARD ACTIVE ANALYSIS VIEW
-              ========================================================================= */}
+          {/* Active Analysis View */}
           {currentAnalysis ? (
-            <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-6">
-              {/* Warnings Advisory Banner (e.g. memory recall fallback) */}
+            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-5">
+              {/* Warnings Banner (if any) */}
               {currentAnalysis.warnings && currentAnalysis.warnings.length > 0 && (
-                <div className="p-4 rounded-xl bg-amber-950/70 border border-amber-500/60 text-amber-200 shadow-lg space-y-1.5 animate-in fade-in">
-                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-300">
-                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-                    Analysis System Warning
+                <div className="p-3 rounded-lg bg-amber-950/60 border border-amber-500/40 text-amber-200 space-y-1">
+                  <div className="flex items-center gap-1.5 font-semibold text-xs text-amber-300">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                    Notice
                   </div>
-                  <ul className="list-disc list-inside space-y-1 text-xs text-amber-200/90 pl-1">
+                  <ul className="list-disc list-inside space-y-0.5 text-xs pl-1">
                     {currentAnalysis.warnings.map((w, idx) => (
                       <li key={idx}>{w}</li>
                     ))}
@@ -631,44 +593,37 @@ export const IncidentDetailPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Mandatory Guardrail Notice */}
-              <div className="p-3 rounded-xl bg-slate-950 border border-amber-500/30 text-xs text-amber-200/90 flex items-start gap-2.5">
-                <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                <div className="leading-relaxed">
-                  <strong className="text-amber-300 font-semibold">Human approval required before any change:</strong>{' '}
-                  All AI reasoning and investigation steps require human verification. TraceMind never executes remediation actions automatically.
-                </div>
-              </div>
+              {/* Guardrail Notice: Single Plain Line */}
+              <p className="text-xs text-amber-400/90 py-1 border-y border-slate-800">
+                Human approval required before any change.
+              </p>
 
-              {/* Hypotheses List */}
-              <div className="space-y-3">
+              {/* SECTION 2: AI HYPOTHESES */}
+              <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
-                    AI Hypotheses
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300 font-mono">
+                    AI hypotheses (unconfirmed)
                   </h4>
-                  <span className="text-[11px] font-mono text-slate-400 px-2 py-0.5 rounded bg-slate-950 border border-slate-800">
-                    AI hypothesis, not confirmed
-                  </span>
                 </div>
 
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {currentAnalysis.hypotheses.map((hyp, index) => (
                     <div
                       key={index}
-                      className="p-3.5 rounded-xl bg-slate-950 border border-slate-800/80 space-y-1.5"
+                      className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="text-sm font-semibold text-slate-100">{hyp.description}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-xs font-semibold text-slate-100">{hyp.description}</p>
                         <span
-                          className={`shrink-0 text-[10px] font-mono uppercase px-2 py-0.5 rounded border font-bold ${
+                          className={`shrink-0 text-[10px] font-mono uppercase px-1.5 py-0.2 rounded border font-semibold ${
                             hyp.confidence === 'high'
-                              ? 'bg-emerald-950/70 border-emerald-500/50 text-emerald-300'
+                              ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300'
                               : hyp.confidence === 'medium'
-                              ? 'bg-amber-950/70 border-amber-500/50 text-amber-300'
-                              : 'bg-blue-950/70 border-blue-500/50 text-blue-300'
+                              ? 'bg-amber-950/70 border-amber-500/40 text-amber-300'
+                              : 'bg-blue-950/70 border-blue-500/40 text-blue-300'
                           }`}
                         >
-                          Confidence: {hyp.confidence}
+                          {hyp.confidence}
                         </span>
                       </div>
                       <p className="text-xs text-slate-400 leading-relaxed">{hyp.rationale}</p>
@@ -677,91 +632,90 @@ export const IncidentDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Investigation Steps Checklist */}
-              <div className="space-y-2.5">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
-                  Recommended Investigation Steps
+              {/* Investigation Steps */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300 font-mono">
+                  Investigation steps
                 </h4>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {currentAnalysis.investigation_steps.map((step, idx) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-950 border border-slate-800/80 text-xs text-slate-200"
+                      className="flex items-start gap-2 p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-200 font-mono"
                     >
-                      <span className="w-5 h-5 rounded-full bg-slate-800 text-teal-400 font-mono text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="w-4 h-4 rounded-full bg-slate-800 text-teal-400 text-[10px] flex items-center justify-center shrink-0 mt-0.5">
                         {idx + 1}
                       </span>
-                      <span className="leading-relaxed flex-1 font-mono">{step}</span>
+                      <span className="flex-1 leading-relaxed">{step}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Recommendation Card */}
-              <div className="p-4 rounded-xl bg-gradient-to-br from-teal-950/40 via-slate-950 to-slate-950 border border-teal-500/40 space-y-3">
+              <div className="p-3.5 rounded-lg bg-slate-950 border border-teal-500/30 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-teal-300 font-mono flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-teal-400" />
-                    AI Action Recommendation
+                  <span className="text-xs font-semibold uppercase tracking-wider text-teal-300 font-mono">
+                    Recommendation
                   </span>
-                  <span className="text-[10px] font-mono text-teal-400/80 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-800">
-                    Awaiting Review
+                  <span className="text-[10px] font-mono text-slate-400">
+                    Awaiting human review
                   </span>
                 </div>
 
-                <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-100 leading-relaxed">
                   {currentAnalysis.recommendation}
                 </p>
 
                 {currentAnalysis.uncertainty_note && (
-                  <p className="text-[11px] text-slate-400 italic pt-1 border-t border-slate-800">
+                  <p className="text-[11px] text-slate-400 italic pt-1 border-t border-slate-800/80">
                     Note: {currentAnalysis.uncertainty_note}
                   </p>
                 )}
 
-                {/* Feedback Evaluation Buttons */}
-                <div className="pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-xs text-slate-400 font-medium">Record Engineer Assessment:</span>
-                  <div className="flex items-center gap-2">
+                {/* Feedback Evaluation Controls */}
+                <div className="pt-2 border-t border-slate-800 flex items-center justify-between gap-2">
+                  <span className="text-xs text-slate-400">Feedback:</span>
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenFeedback('accept')}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-500/50 text-emerald-300 text-xs font-semibold transition cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-medium border border-slate-700 transition cursor-pointer"
                     >
-                      <ThumbsUp className="w-3.5 h-3.5 text-emerald-400" />
+                      <ThumbsUp className="w-3 h-3 text-emerald-400" />
                       Accept
                     </button>
                     <button
                       onClick={() => handleOpenFeedback('modify')}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-950/70 hover:bg-amber-900 border border-amber-500/50 text-amber-300 text-xs font-semibold transition cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-medium border border-slate-700 transition cursor-pointer"
                     >
-                      <Edit3 className="w-3.5 h-3.5 text-amber-400" />
+                      <Edit3 className="w-3 h-3 text-amber-400" />
                       Modify
                     </button>
                     <button
                       onClick={() => handleOpenFeedback('reject')}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-950/70 hover:bg-rose-900 border border-rose-500/50 text-rose-300 text-xs font-semibold transition cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-rose-300 text-xs font-medium border border-slate-700 transition cursor-pointer"
                     >
-                      <ThumbsDown className="w-3.5 h-3.5 text-rose-400" />
+                      <ThumbsDown className="w-3 h-3 text-rose-400" />
                       Reject
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Recalled Memories from Hindsight Section (Capped at 8 per contract) */}
+              {/* SECTION 3: RECALLED FROM HINDSIGHT */}
               {currentAnalysis.recalled_memories && currentAnalysis.recalled_memories.length > 0 ? (
-                <div className="space-y-3 pt-2">
+                <div className="space-y-2.5 pt-1">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-teal-300 font-mono flex items-center gap-1.5">
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-teal-300 font-mono flex items-center gap-1.5">
                       <Brain className="w-3.5 h-3.5 text-teal-400" />
-                      Recalled From Hindsight Memory Bank ({Math.min(currentAnalysis.recalled_memories.length, 8)})
+                      Recalled from Hindsight ({Math.min(currentAnalysis.recalled_memories.length, 8)})
                     </h4>
-                    <span className="text-[10px] font-mono text-teal-400/80">
+                    <span className="text-[10px] font-mono text-slate-400">
                       Bank: {bankId}
                     </span>
                   </div>
 
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     {currentAnalysis.recalled_memories.slice(0, 8).map((mem, index) => {
                       const sourceId =
                         mem.source_incident_id ||
@@ -769,13 +723,25 @@ export const IncidentDetailPage: React.FC = () => {
                         mem.text.match(/INC-[\w-]+/)?.[0] ||
                         null;
 
+                      const scoreValue =
+                        mem.score !== undefined && mem.score !== null
+                          ? typeof mem.score === 'number'
+                            ? mem.score.toFixed(2)
+                            : String(mem.score)
+                          : null;
+
                       return (
                         <div
                           key={mem.id || `mem-${index}`}
-                          className="p-3.5 rounded-xl bg-slate-950 border border-teal-500/30 space-y-2 hover:border-teal-500/60 transition"
+                          className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1.5 hover:border-teal-500/40 transition"
                         >
                           <div className="flex items-center justify-between text-[11px] font-mono">
-                            <span className="text-teal-400 font-bold">{mem.id || 'MEM-REF'}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-teal-400 font-semibold">{mem.id || `MEM-${index + 1}`}</span>
+                              {scoreValue && (
+                                <span className="text-slate-400">Score: {scoreValue}</span>
+                              )}
+                            </div>
                             {sourceId && (
                               <Link
                                 to={`/incidents/${sourceId}`}
@@ -786,14 +752,14 @@ export const IncidentDetailPage: React.FC = () => {
                             )}
                           </div>
 
-                          <p className="text-xs text-slate-200 leading-relaxed font-sans">{mem.text}</p>
+                          <p className="text-xs text-slate-200 leading-relaxed">{mem.text}</p>
 
                           {mem.entities && mem.entities.length > 0 && (
-                            <div className="flex flex-wrap gap-1 pt-1">
+                            <div className="flex flex-wrap gap-1 pt-0.5">
                               {mem.entities.map((entity, i) => (
                                 <span
                                   key={i}
-                                  className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300"
+                                  className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-slate-800 text-slate-300"
                                 >
                                   {entity}
                                 </span>
@@ -806,21 +772,21 @@ export const IncidentDetailPage: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-500 italic">
-                  Zero memories recalled (Zero-shot run or no past matching pattern found).
+                <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-500 italic">
+                  Zero memories recalled for this analysis.
                 </div>
               )}
 
-              {/* Feedback History on this Incident */}
+              {/* Feedback History */}
               {incident.feedback && incident.feedback.length > 0 && (
-                <div className="pt-3 border-t border-slate-800 space-y-2 text-xs">
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono">
-                    Prior Engineer Reviews ({incident.feedback.length})
+                <div className="pt-2 border-t border-slate-800 space-y-1.5 text-xs">
+                  <h4 className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 font-mono">
+                    Prior reviews ({incident.feedback.length})
                   </h4>
                   {incident.feedback.map((fb) => (
                     <div
                       key={fb.id}
-                      className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80 flex items-start justify-between gap-3"
+                      className="p-2 rounded bg-slate-950 border border-slate-800 flex items-start justify-between gap-2"
                     >
                       <div>
                         <div className="flex items-center gap-2">
@@ -839,9 +805,9 @@ export const IncidentDetailPage: React.FC = () => {
                             {new Date(fb.created_at).toLocaleTimeString()}
                           </span>
                         </div>
-                        {fb.notes && <p className="text-slate-300 text-xs mt-1">{fb.notes}</p>}
+                        {fb.notes && <p className="text-slate-300 text-xs mt-0.5">{fb.notes}</p>}
                         {fb.modified_recommendation && (
-                          <p className="text-amber-200 text-xs mt-1 italic">
+                          <p className="text-amber-200 text-xs mt-0.5 italic">
                             Modified: {fb.modified_recommendation}
                           </p>
                         )}
@@ -852,24 +818,24 @@ export const IncidentDetailPage: React.FC = () => {
               )}
             </div>
           ) : (
-            /* Empty state when no analysis has run yet */
-            <div className="p-8 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl text-center space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 mx-auto">
-                <Brain className="w-6 h-6" />
+            /* Empty state when no analysis has run */
+            <div className="p-6 rounded-xl bg-slate-900 border border-slate-800 text-center space-y-3">
+              <div className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-teal-400 mx-auto">
+                <Brain className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-base font-bold text-slate-200">AI Incident Analysis Ready</h4>
-                <p className="text-xs text-slate-400 max-w-md mx-auto mt-1 leading-relaxed">
-                  Trigger Groq reasoning grounded by Hindsight institutional memory to generate hypotheses, investigation steps, and pattern-matched recommendations.
+                <h4 className="text-sm font-semibold text-slate-200">No analysis run yet</h4>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto mt-0.5">
+                  Run Groq AI with Hindsight memory to generate hypotheses and investigate steps.
                 </p>
               </div>
               <button
                 onClick={() => handleRunAnalysis()}
                 disabled={analyzing}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs shadow-lg transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 font-semibold text-xs transition cursor-pointer"
               >
-                <Sparkles className="w-4 h-4" />
-                Analyze Incident Now
+                <Sparkles className="w-3.5 h-3.5" />
+                Analyze Incident
               </button>
             </div>
           )}
