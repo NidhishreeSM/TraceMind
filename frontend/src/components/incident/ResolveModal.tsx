@@ -98,33 +98,27 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
       {resolutionResult ? (
         <div className="space-y-5 animate-in zoom-in-95 duration-200">
           {/* Hindsight Retain Confirmation Badge */}
-          <div
-            className={`p-4 rounded-xl border ${
-              resolutionResult.retained_in_hindsight
-                ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-200'
-                : 'bg-amber-950/60 border-amber-500/50 text-amber-200'
-            }`}
-          >
+          <div className="p-5 rounded-2xl bg-[#101C3D] border border-white/15 text-white">
             <div className="flex items-start gap-3">
               {resolutionResult.retained_in_hindsight ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-5 h-5 text-[#3B82F6] shrink-0 mt-0.5" />
               ) : (
-                <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                <AlertTriangle className="w-5 h-5 text-[#EF4444] shrink-0 mt-0.5" />
               )}
               <div className="space-y-1">
-                <div className="font-bold text-sm flex items-center gap-2">
+                <div className="font-semibold text-sm flex items-center gap-2">
                   <span>
                     {resolutionResult.retained_in_hindsight
                       ? 'Retained in Hindsight Memory'
-                      : 'Hindsight Retain Advisory'}
+                      : 'Hindsight Retain Notice'}
                   </span>
-                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-900/60 border border-emerald-500/40">
+                  <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-white/10 border border-white/10 text-[#C9D6EA]">
                     Status: {resolutionResult.hindsight_status}
                   </span>
                 </div>
-                <p className="text-xs opacity-90 leading-relaxed">
+                <p className="text-xs text-[#8FA0BF] leading-relaxed">
                   {resolutionResult.retained_in_hindsight
-                    ? 'This resolution has been indexed into Hindsight persistent memory bank. Subsequent similar incidents will now automatically recall this verified fix!'
+                    ? 'This resolution has been indexed into Hindsight persistent memory bank. Subsequent similar incidents will now recall this verified fix.'
                     : resolutionResult.error || 'Resolution saved locally, but Hindsight retain reported degraded status.'}
                 </p>
               </div>
@@ -132,25 +126,25 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
           </div>
 
           {/* Resolution Summary Card */}
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3 text-xs">
+          <div className="p-4 rounded-2xl bg-[#050B1A] border border-white/10 space-y-3 text-xs">
             <div>
-              <span className="font-mono text-slate-400 uppercase text-[10px] block">Confirmed Cause</span>
-              <p className="text-slate-200 font-medium mt-0.5">{resolutionResult.resolution.confirmed_cause}</p>
+              <span className="font-mono text-[#8FA0BF] uppercase text-[10px] block">Confirmed Cause</span>
+              <p className="text-white font-medium mt-0.5">{resolutionResult.resolution.confirmed_cause}</p>
             </div>
             <div>
-              <span className="font-mono text-slate-400 uppercase text-[10px] block">Verified Resolution</span>
-              <p className="text-teal-300 font-medium mt-0.5">{resolutionResult.resolution.verified_resolution}</p>
+              <span className="font-mono text-[#8FA0BF] uppercase text-[10px] block">Verified Resolution</span>
+              <p className="text-[#C9D6EA] font-medium mt-0.5">{resolutionResult.resolution.verified_resolution}</p>
             </div>
             <div>
-              <span className="font-mono text-slate-400 uppercase text-[10px] block">Outcome</span>
-              <p className="text-slate-300 mt-0.5">{resolutionResult.resolution.outcome}</p>
+              <span className="font-mono text-[#8FA0BF] uppercase text-[10px] block">Outcome</span>
+              <p className="text-[#8FA0BF] mt-0.5">{resolutionResult.resolution.outcome}</p>
             </div>
           </div>
 
           <div className="flex justify-end pt-3">
             <button
               onClick={handleFinish}
-              className="px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs shadow-lg transition cursor-pointer"
+              className="px-6 py-2.5 rounded-full bg-white hover:bg-[#C9D6EA] text-[#050B1A] font-semibold text-xs transition cursor-pointer"
             >
               Done & Return to Incident
             </button>
@@ -162,46 +156,46 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
             <button
               type="button"
               onClick={autofillDemoResolution}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-purple-950/70 border border-purple-500/40 text-purple-200 text-xs hover:bg-purple-900 transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/30 text-white hover:bg-white/5 text-xs transition cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+              <Sparkles className="w-3.5 h-3.5 text-[#C9D6EA]" />
               Autofill Verified Resolution
             </button>
           </div>
 
           {/* Confirmed Root Cause */}
           <div className="space-y-1">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-              Confirmed Root Cause <span className="text-rose-400">*</span>
+            <label className="block text-xs font-medium uppercase tracking-wider text-white">
+              Confirmed Root Cause <span className="text-[#EF4444]">*</span>
             </label>
             <input
               type="text"
               placeholder="e.g. Unhandled exception bypassed connection release in checkout handler"
               value={confirmedCause}
               onChange={(e) => setConfirmedCause(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-200 focus:outline-hidden focus:border-teal-500"
+              className="w-full px-3.5 py-2.5 bg-[#101C3D] border border-white/10 rounded-xl text-xs sm:text-sm text-white focus:outline-hidden focus:border-[#3B82F6]"
               required
             />
           </div>
 
           {/* Verified Resolution */}
           <div className="space-y-1">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-              Verified Resolution <span className="text-rose-400">*</span>
+            <label className="block text-xs font-medium uppercase tracking-wider text-white">
+              Verified Resolution <span className="text-[#EF4444]">*</span>
             </label>
             <textarea
               rows={2}
               placeholder="Explain exactly how the issue was fixed and verified..."
               value={verifiedResolution}
               onChange={(e) => setVerifiedResolution(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-200 focus:outline-hidden focus:border-teal-500"
+              className="w-full px-3.5 py-2.5 bg-[#101C3D] border border-white/10 rounded-xl text-xs sm:text-sm text-white focus:outline-hidden focus:border-[#3B82F6]"
               required
             />
           </div>
 
           {/* Steps Taken */}
           <div className="space-y-1">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+            <label className="block text-xs font-medium uppercase tracking-wider text-white">
               Investigation & Remediation Steps Taken (one per line)
             </label>
             <textarea
@@ -209,13 +203,13 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
               placeholder="- Queried pg_stat_activity&#10;- Wrapped DB session inside try/finally context manager&#10;- Redeployed payment-api"
               value={stepsTaken}
               onChange={(e) => setStepsTaken(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm font-mono text-slate-200 focus:outline-hidden focus:border-teal-500"
+              className="w-full px-3.5 py-2.5 bg-[#101C3D] border border-white/10 rounded-xl text-xs sm:text-sm font-mono text-white focus:outline-hidden focus:border-[#3B82F6]"
             />
           </div>
 
           {/* Failed Attempts */}
           <div className="space-y-1">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+            <label className="block text-xs font-medium uppercase tracking-wider text-white">
               Failed Attempts / Dead Ends (vital for Hindsight memory learning)
             </label>
             <textarea
@@ -223,13 +217,13 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
               placeholder="- Restarted pods without code fix (pool exhausted again in 3 minutes)"
               value={failedAttempts}
               onChange={(e) => setFailedAttempts(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm font-mono text-slate-200 focus:outline-hidden focus:border-teal-500"
+              className="w-full px-3.5 py-2.5 bg-[#101C3D] border border-white/10 rounded-xl text-xs sm:text-sm font-mono text-white focus:outline-hidden focus:border-[#3B82F6]"
             />
           </div>
 
           {/* Outcome */}
           <div className="space-y-1">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+            <label className="block text-xs font-medium uppercase tracking-wider text-white">
               Verification Outcome
             </label>
             <input
@@ -237,25 +231,25 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
               placeholder="e.g. Active DB connections dropped from 200 to 18; 0 checkout timeouts observed."
               value={outcome}
               onChange={(e) => setOutcome(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-200 focus:outline-hidden focus:border-teal-500"
+              className="w-full px-3.5 py-2.5 bg-[#101C3D] border border-white/10 rounded-xl text-xs sm:text-sm text-white focus:outline-hidden focus:border-[#3B82F6]"
             />
           </div>
 
           {/* Actions */}
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
+          <div className="pt-3 border-t border-white/8 flex items-center justify-between">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200"
+              className="px-4 py-2 text-xs font-semibold text-[#8FA0BF] hover:text-white"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs shadow-lg transition cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white hover:bg-[#C9D6EA] text-[#050B1A] font-semibold text-xs transition cursor-pointer disabled:opacity-50"
             >
-              <Brain className="w-4 h-4 text-slate-950" />
+              <Brain className="w-4 h-4 text-[#050B1A]" />
               {submitting ? 'Retaining in Hindsight...' : 'Resolve & Retain in Memory'}
             </button>
           </div>

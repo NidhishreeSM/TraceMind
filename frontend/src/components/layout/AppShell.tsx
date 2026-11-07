@@ -7,7 +7,7 @@ export const AppShell: React.FC = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#050B1A] text-white">
       {/* Desktop Sidebar */}
       <div className="hidden md:flex h-full shrink-0">
         <Sidebar />
@@ -17,7 +17,7 @@ export const AppShell: React.FC = () => {
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
           <div
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
+            className="fixed inset-0 bg-[#050B1A]/80 backdrop-blur-sm"
             onClick={() => setMobileSidebarOpen(false)}
           />
           <div className="relative z-10 w-64 max-w-[80vw] h-full shadow-2xl animate-in slide-in-from-left duration-200">
@@ -29,11 +29,10 @@ export const AppShell: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         <TopBar onToggleSidebar={() => setMobileSidebarOpen((prev) => !prev)} />
-        <main className="flex-1 overflow-y-auto bg-slate-950 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto bg-[#050B1A] p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
     </div>
   );
 };
-
