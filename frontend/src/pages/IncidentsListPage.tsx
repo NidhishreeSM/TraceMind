@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Search,
   Plus,
@@ -16,6 +16,7 @@ import { EmptyState } from '../components/common/EmptyState';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 
 export const IncidentsListPage: React.FC = () => {
+  const navigate = useNavigate();
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -236,7 +237,7 @@ export const IncidentsListPage: React.FC = () => {
               : 'Zero incidents found in database. Seed sample data or declare a new incident.'
           }
           actionText={hasActiveFilters ? 'Clear Filters' : 'Declare Incident'}
-          onAction={hasActiveFilters ? resetFilters : () => window.location.assign('/incidents/new')}
+          onAction={hasActiveFilters ? resetFilters : () => navigate('/incidents/new')}
         />
       )}
 
@@ -260,7 +261,7 @@ export const IncidentsListPage: React.FC = () => {
                   <tr
                     key={incident.id}
                     className="hover:bg-slate-800/40 transition group cursor-pointer"
-                    onClick={() => window.location.assign(`/incidents/${incident.id}`)}
+                    onClick={() => navigate(`/incidents/${incident.id}`)}
                   >
                     {/* ID */}
                     <td className="py-2.5 px-3 font-mono font-bold text-teal-400 whitespace-nowrap">

@@ -30,7 +30,7 @@ export * from './client';
 export function extractErrorMessage(err: unknown): string {
   if (err instanceof AxiosError && err.response?.data) {
     const errorPayload = err.response.data as ApiErrorPayload;
-    const code = errorPayload.error?.code;
+    const code = errorPayload.error?.code || (err.response.headers?.['x-error-code'] as string);
 
     if (code === 'HINDSIGHT_UNAVAILABLE') {
       return 'Memory service unavailable';
@@ -40,6 +40,18 @@ export function extractErrorMessage(err: unknown): string {
     }
     if (errorPayload.error?.message) {
       return errorPayload.error.message;
+    }
+
+    // Handle standard FastAPI validation error format: { detail: ... }
+    const rawData = err.response.data as { detail?: string | Array<{ msg?: string; message?: string }> };
+    if (typeof rawData.detail === 'string') {
+      return rawData.detail;
+    }
+    if (Array.isArray(rawData.detail) && rawData.detail.length > 0) {
+      const messages = rawData.detail.map((d) => d.msg || d.message).filter(Boolean);
+      if (messages.length > 0) {
+        return messages.join(', ');
+      }
     }
   }
   if (err instanceof Error) {

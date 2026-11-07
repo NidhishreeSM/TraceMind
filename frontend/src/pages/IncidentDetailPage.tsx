@@ -219,7 +219,7 @@ export const IncidentDetailPage: React.FC = () => {
   const citedMemoryIds = Array.from(
     new Set(
       (memoryAnalysis?.recalled_memories || [])
-        .map((m) => m.source_incident_id || (m.metadata?.incident_id as string) || m.text.match(/INC-[\w-]+/)?.[0])
+        .map((m) => m.source_incident_id || (m.metadata?.incident_id as string) || m.text?.match(/INC-[\w-]+/)?.[0])
         .filter(Boolean)
     )
   );
@@ -720,7 +720,7 @@ export const IncidentDetailPage: React.FC = () => {
                       const sourceId =
                         mem.source_incident_id ||
                         (mem.metadata?.incident_id as string) ||
-                        mem.text.match(/INC-[\w-]+/)?.[0] ||
+                        mem.text?.match(/INC-[\w-]+/)?.[0] ||
                         null;
 
                       const scoreValue =

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   AlertOctagon,
   CheckCircle2,
@@ -39,6 +39,7 @@ function hasEnoughLiveSamples(
 }
 
 export const DashboardPage: React.FC = () => {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
   const [memoryStats, setMemoryStats] = useState<MemoryStatsResponse | null>(null);
   const [recentIncidents, setRecentIncidents] = useState<Incident[]>([]);
@@ -400,7 +401,10 @@ export const DashboardPage: React.FC = () => {
                 <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
                   <span className="text-slate-500 block text-[10px] uppercase font-mono">Avg Resolution</span>
                   <span className="font-mono font-bold text-slate-200 text-base mt-0.5 block">
-                    {demoBenchmark.avg_sample_resolution_minutes.toFixed(1)} min
+                    {demoBenchmark.avg_sample_resolution_minutes != null
+                      ? Number(demoBenchmark.avg_sample_resolution_minutes).toFixed(1)
+                      : '0.0'}{' '}
+                    min
                   </span>
                 </div>
               </div>
@@ -429,7 +433,7 @@ export const DashboardPage: React.FC = () => {
                 title="No incidents logged"
                 description="Zero reported incidents."
                 actionText="Declare an Incident"
-                onAction={() => window.location.assign('/incidents/new')}
+                onAction={() => navigate('/incidents/new')}
                 className="mt-3"
               />
             ) : (
