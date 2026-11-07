@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   BarChart,
   Bar,
@@ -38,6 +39,7 @@ function hasEnoughLiveSamples(
 }
 
 export const AnalyticsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +116,7 @@ export const AnalyticsPage: React.FC = () => {
           title="No analytics telemetry available"
           description="Zero incidents found. As incidents are recorded and resolved, telemetry will appear here."
           actionText="Declare an Incident"
-          onAction={() => window.location.assign('/incidents/new')}
+          onAction={() => navigate('/incidents/new')}
         />
       </div>
     );
@@ -473,7 +475,10 @@ export const AnalyticsPage: React.FC = () => {
             <div className="p-3 rounded-xl bg-[#131C31] border border-white/[0.07]">
               <span className="text-[#94A3B8] block text-[10px] uppercase font-mono">Avg Resolution</span>
               <span className="font-mono font-bold text-[#F1F5F9] text-base mt-0.5 block">
-                {demoBenchmark.avg_sample_resolution_minutes.toFixed(1)} min
+                {demoBenchmark.avg_sample_resolution_minutes != null
+                  ? Number(demoBenchmark.avg_sample_resolution_minutes).toFixed(1)
+                  : '0.0'}{' '}
+                min
               </span>
             </div>
           </div>

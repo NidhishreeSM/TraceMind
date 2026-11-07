@@ -205,7 +205,7 @@ export const MemoryExplorerPage: React.FC = () => {
               const incidentId =
                 mem.source_incident_id ||
                 (mem.metadata?.incident_id as string) ||
-                mem.text.match(/INC-[\w-]+/)?.[0] ||
+                mem.text?.match(/INC-[\w-]+/)?.[0] ||
                 null;
 
               const service = (mem.metadata?.service as string) || null;
