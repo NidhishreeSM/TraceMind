@@ -18,6 +18,8 @@ from pathlib import Path
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
+from typing import Dict, Any
+from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -25,6 +27,63 @@ from backend.app.core.config import settings
 from backend.app.models.database import SessionLocal, Incident, Resolution, Analysis, Feedback, init_db
 from backend.app.services.hindsight_service import hindsight_service
 from backend.app.services.incident_service import generate_next_incident_id
+
+
+def reset_database_live_records(db: Session) -> Dict[str, int]:
+    """
+    Deletes all live incidents along with all analyses, feedback, and resolutions
+    that belong to them, and sweeps any orphan records so that only demo incidents remain
+    without orphan rows. Returns counts of deleted records.
+    """
+    demo_incidents = db.query(Incident).filter(Incident.is_demo == True).all()
+    demo_ids = set(inc.id for inc in demo_incidents)
+
+    live_incidents = db.query(Incident).filter(
+        (Incident.is_demo == False) | (~Incident.id.startswith("INC-DEMO-"))
+    ).all()
+    live_ids = set(inc.id for inc in live_incidents)
+
+    live_analyses = db.query(Analysis).filter(
+        Analysis.incident_id.in_(live_ids) | ~Analysis.incident_id.in_(demo_ids)
+    ).all()
+
+    live_resolutions = db.query(Resolution).filter(
+        Resolution.incident_id.in_(live_ids) | ~Resolution.incident_id.in_(demo_ids)
+    ).all()
+
+    live_feedbacks = db.query(Feedback).filter(
+        Feedback.incident_id.in_(live_ids) | ~Feedback.incident_id.in_(demo_ids)
+    ).all()
+
+    counts = {
+        "incidents": len(live_incidents),
+        "analyses": len(live_analyses),
+        "resolutions": len(live_resolutions),
+        "feedbacks": len(live_feedbacks)
+    }
+
+    for f in live_feedbacks:
+        db.delete(f)
+    for a in live_analyses:
+        db.delete(a)
+    for r in live_resolutions:
+        db.delete(r)
+    for inc in live_incidents:
+        db.delete(inc)
+
+    db.commit()
+
+    # Final orphan sweep to ensure absolutely zero orphaned child rows exist
+    orphan_analyses = db.query(Analysis).filter(~Analysis.incident_id.in_(demo_ids)).all()
+    orphan_resolutions = db.query(Resolution).filter(~Resolution.incident_id.in_(demo_ids)).all()
+    orphan_feedbacks = db.query(Feedback).filter(~Feedback.incident_id.in_(demo_ids)).all()
+
+    for item in orphan_analyses + orphan_resolutions + orphan_feedbacks:
+        db.delete(item)
+    if orphan_analyses or orphan_resolutions or orphan_feedbacks:
+        db.commit()
+
+    return counts
 
 
 def reset_live_data(execute: bool = False) -> bool:
@@ -56,13 +115,23 @@ def reset_live_data(execute: bool = False) -> bool:
     docs_to_preserve = [d for d in all_hindsight_docs if d["id"] and str(d["id"]).startswith("INC-DEMO-")]
 
     # 2. Inspect Database records
-    live_incidents = db.query(Incident).filter(Incident.is_demo == False).all()
-    live_ids = [inc.id for inc in live_incidents]
-    live_resolutions = db.query(Resolution).filter(Resolution.incident_id.in_(live_ids)).all() if live_ids else []
-    live_analyses = db.query(Analysis).filter(Analysis.incident_id.in_(live_ids)).all() if live_ids else []
-    live_feedbacks = db.query(Feedback).filter(Feedback.incident_id.in_(live_ids)).all() if live_ids else []
-
     demo_incidents_count = db.query(Incident).filter(Incident.is_demo == True).count()
+    demo_ids = set(r[0] for r in db.query(Incident.id).filter(Incident.is_demo == True).all())
+
+    live_incidents = db.query(Incident).filter(
+        (Incident.is_demo == False) | (~Incident.id.startswith("INC-DEMO-"))
+    ).all()
+    live_ids = set(inc.id for inc in live_incidents)
+
+    live_resolutions = db.query(Resolution).filter(
+        Resolution.incident_id.in_(live_ids) | ~Resolution.incident_id.in_(demo_ids)
+    ).all()
+    live_analyses = db.query(Analysis).filter(
+        Analysis.incident_id.in_(live_ids) | ~Analysis.incident_id.in_(demo_ids)
+    ).all()
+    live_feedbacks = db.query(Feedback).filter(
+        Feedback.incident_id.in_(live_ids) | ~Feedback.incident_id.in_(demo_ids)
+    ).all()
 
     print("\n--- INVENTORY OF ITEMS TO REMOVE ---")
     print(f"Hindsight documents to delete: {len(docs_to_delete)}")
@@ -112,21 +181,8 @@ def reset_live_data(execute: bool = False) -> bool:
 
     # 4. Delete live records from Database
     print(f"\nDeleting live records from database...")
-    if live_feedbacks:
-        for f in live_feedbacks:
-            db.delete(f)
-    if live_analyses:
-        for a in live_analyses:
-            db.delete(a)
-    if live_resolutions:
-        for r in live_resolutions:
-            db.delete(r)
-    if live_incidents:
-        for inc in live_incidents:
-            db.delete(inc)
-
-    db.commit()
-    print("  ✓ Database live rows removed successfully.")
+    del_counts = reset_database_live_records(db)
+    print(f"  ✓ Database live rows removed successfully (incidents={del_counts['incidents']}, analyses={del_counts['analyses']}, resolutions={del_counts['resolutions']}, feedbacks={del_counts['feedbacks']}).")
 
     # 5. Verify reset state
     next_id = generate_next_incident_id(db)

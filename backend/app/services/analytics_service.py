@@ -68,9 +68,11 @@ class AnalyticsService:
 
         basis = "live_runs" if (live_mttr_with or live_mttr_without) else "insufficient_live_data"
 
-        # 4. Recall Hit Rate (REAL ANALYSES ONLY: use_memory=True)
+        # 4. Recall Hit Rate (LIVE ANALYSES ONLY: use_memory=True on non-demo incidents)
         memory_analyses = db.scalars(
-            select(Analysis).where(Analysis.use_memory == True)
+            select(Analysis)
+            .join(Incident, Analysis.incident_id == Incident.id)
+            .where(Incident.is_demo == False, Analysis.use_memory == True)
         ).all()
 
         recall_hit_rate = None
@@ -86,14 +88,18 @@ class AnalyticsService:
             recall_hit_rate = round(hits / len(memory_analyses), 2)
             recall_hit_rate_note = f"Computed from {len(memory_analyses)} live memory analysis call(s) ({hits} hits)"
         else:
+            recall_hit_rate = None
             recall_hit_rate_note = "No live memory analyses recorded yet"
 
-        # 5. Feedback Accept Rate
-        total_feedbacks = db.scalar(select(func.count(Feedback.id))) or 0
+        # 5. Feedback Accept Rate (LIVE ONLY: non-demo incidents)
+        live_feedbacks = db.scalars(
+            select(Feedback)
+            .join(Incident, Feedback.incident_id == Incident.id)
+            .where(Incident.is_demo == False)
+        ).all()
+        total_feedbacks = len(live_feedbacks)
         if total_feedbacks > 0:
-            accepted_feedbacks = db.scalar(
-                select(func.count(Feedback.id)).where(Feedback.feedback_type == "accept")
-            ) or 0
+            accepted_feedbacks = sum(1 for f in live_feedbacks if f.feedback_type == "accept")
             feedback_accept_rate = round(accepted_feedbacks / total_feedbacks, 2)
         else:
             feedback_accept_rate = None

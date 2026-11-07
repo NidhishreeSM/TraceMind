@@ -168,3 +168,220 @@ def test_error_envelope_mapping():
         assert res.json()["error"]["code"] == "LLM_UNAVAILABLE"
 
 
+def test_rule_1_analytics_counts_only_non_demo_analyses(memory_db):
+    """Rule 1: Analytics must count only analyses that belong to non-demo (is_demo=false) incidents."""
+    service = AnalyticsService()
+
+    # Create demo incident with an analysis that has use_memory=True
+    demo_inc = Incident(
+        id="INC-DEMO-001",
+        title="Demo incident",
+        service="payment-api",
+        environment="production",
+        severity="high",
+        status="resolved",
+        symptoms="Demo symptoms",
+        is_demo=True,
+        created_at=datetime.now(timezone.utc)
+    )
+    demo_analysis = Analysis(
+        incident_id="INC-DEMO-001",
+        use_memory=True,
+        model_used="openai/gpt-oss-120b",
+        latency_ms=1200,
+        hypotheses_json="[]",
+        investigation_steps_json="[]",
+        recommendation="Demo fix",
+        uncertainty_note="Demo note",
+        recalled_memories_json=json.dumps([{"id": "mem_1", "text": "precedent"}]),
+        created_at=datetime.now(timezone.utc)
+    )
+    memory_db.add(demo_inc)
+    memory_db.add(demo_analysis)
+    memory_db.commit()
+
+    # With only demo incidents, live recall_hit_rate must ignore the demo analysis
+    summary = service.get_summary(memory_db)
+    assert summary.demo_incidents == 1
+    assert summary.live_incidents == 0
+    assert summary.memory_impact.recall_hit_rate is None
+    assert summary.memory_impact.recall_hit_rate_note == "No live memory analyses recorded yet"
+
+    # Now add a live (non-demo) incident with a memory analysis
+    live_inc = Incident(
+        id="INC-001",
+        title="Live incident",
+        service="payment-api",
+        environment="production",
+        severity="critical",
+        status="open",
+        symptoms="Live symptoms",
+        is_demo=False,
+        created_at=datetime.now(timezone.utc)
+    )
+    live_analysis = Analysis(
+        incident_id="INC-001",
+        use_memory=True,
+        model_used="openai/gpt-oss-120b",
+        latency_ms=1400,
+        hypotheses_json="[]",
+        investigation_steps_json="[]",
+        recommendation="Live fix",
+        uncertainty_note="Live note",
+        recalled_memories_json=json.dumps([{"id": "mem_live", "text": "live precedent"}]),
+        created_at=datetime.now(timezone.utc)
+    )
+    memory_db.add(live_inc)
+    memory_db.add(live_analysis)
+    memory_db.commit()
+
+    summary_live = service.get_summary(memory_db)
+    assert summary_live.live_incidents == 1
+    assert summary_live.memory_impact.recall_hit_rate == 1.0
+    assert "1 live memory analysis call(s)" in summary_live.memory_impact.recall_hit_rate_note
+
+
+def test_rule_2_reset_live_data_deletes_child_rows_and_no_orphans(memory_db):
+    """Rule 2: reset_live_data.py must also delete analyses, feedback and resolutions that belong to live incidents, leaving no orphan rows."""
+    from backend.scripts.reset_live_data import reset_database_live_records
+
+    # 1. Seed demo incident with resolution
+    demo_inc = Incident(
+        id="INC-DEMO-001",
+        title="Demo incident",
+        service="payment-api",
+        environment="production",
+        severity="high",
+        status="resolved",
+        symptoms="Demo symptoms",
+        is_demo=True,
+        created_at=datetime.now(timezone.utc)
+    )
+    demo_res = Resolution(
+        incident_id="INC-DEMO-001",
+        confirmed_cause="Demo root cause",
+        steps_taken_json="[]",
+        verified_resolution="Demo fix",
+        created_at=datetime.now(timezone.utc)
+    )
+    memory_db.add(demo_inc)
+    memory_db.add(demo_res)
+
+    # 2. Add live incident with full child records (analysis, resolution, feedback)
+    live_inc = Incident(
+        id="INC-001",
+        title="Live incident",
+        service="orders-db",
+        environment="production",
+        severity="critical",
+        status="resolved",
+        symptoms="Live symptoms",
+        is_demo=False,
+        created_at=datetime.now(timezone.utc)
+    )
+    live_res = Resolution(
+        incident_id="INC-001",
+        confirmed_cause="Live cause",
+        steps_taken_json="[]",
+        verified_resolution="Live fix",
+        created_at=datetime.now(timezone.utc)
+    )
+    live_analysis = Analysis(
+        incident_id="INC-001",
+        use_memory=True,
+        model_used="openai/gpt-oss-120b",
+        latency_ms=1100,
+        hypotheses_json="[]",
+        investigation_steps_json="[]",
+        recommendation="Live fix",
+        uncertainty_note="Live note",
+        created_at=datetime.now(timezone.utc)
+    )
+    live_feedback = Feedback(
+        incident_id="INC-001",
+        feedback_type="accept",
+        notes="Great fix",
+        created_at=datetime.now(timezone.utc)
+    )
+    memory_db.add(live_inc)
+    memory_db.add(live_res)
+    memory_db.add(live_analysis)
+    memory_db.add(live_feedback)
+
+    # 3. Add an orphan analysis and orphan feedback (whose incident_id does not exist)
+    orphan_analysis = Analysis(
+        incident_id="INC-DELETED-999",
+        use_memory=True,
+        model_used="openai/gpt-oss-120b",
+        latency_ms=900,
+        hypotheses_json="[]",
+        investigation_steps_json="[]",
+        recommendation="Orphan fix",
+        uncertainty_note="Orphan note",
+        created_at=datetime.now(timezone.utc)
+    )
+    orphan_feedback = Feedback(
+        incident_id="INC-DELETED-999",
+        feedback_type="reject",
+        notes="Orphan feedback",
+        created_at=datetime.now(timezone.utc)
+    )
+    memory_db.add(orphan_analysis)
+    memory_db.add(orphan_feedback)
+    memory_db.commit()
+
+    # Pre-reset assertions
+    assert memory_db.query(Incident).count() == 2
+    assert memory_db.query(Analysis).count() == 2
+    assert memory_db.query(Resolution).count() == 2
+    assert memory_db.query(Feedback).count() == 2
+
+    # Execute reset
+    del_counts = reset_database_live_records(memory_db)
+
+    # Post-reset assertions
+    assert del_counts["incidents"] == 1
+    assert memory_db.query(Incident).filter(Incident.is_demo == False).count() == 0
+    assert memory_db.query(Incident).filter(Incident.id == "INC-DEMO-001").count() == 1
+
+    # Verify no live or orphan child rows exist
+    demo_ids = [r[0] for r in memory_db.query(Incident.id).filter(Incident.is_demo == True).all()]
+    orphan_analyses_count = memory_db.query(Analysis).filter(~Analysis.incident_id.in_(demo_ids)).count()
+    orphan_resolutions_count = memory_db.query(Resolution).filter(~Resolution.incident_id.in_(demo_ids)).count()
+    orphan_feedbacks_count = memory_db.query(Feedback).filter(~Feedback.incident_id.in_(demo_ids)).count()
+
+    assert orphan_analyses_count == 0
+    assert orphan_resolutions_count == 0
+    assert orphan_feedbacks_count == 0
+    assert memory_db.query(Resolution).filter(Resolution.incident_id == "INC-DEMO-001").count() == 1
+
+
+def test_rule_3_recall_hit_rate_null_when_zero_live_analyses(memory_db):
+    """Rule 3: recall_hit_rate must be null with a plain note when there are zero live memory analyses."""
+    service = AnalyticsService()
+
+    # 1. Completely empty database
+    summary_empty = service.get_summary(memory_db)
+    assert summary_empty.memory_impact.recall_hit_rate is None
+    assert summary_empty.memory_impact.recall_hit_rate_note == "No live memory analyses recorded yet"
+
+    # 2. Database with only demo incidents and demo analyses
+    demo_inc = Incident(
+        id="INC-DEMO-002",
+        title="Demo incident 2",
+        service="orders-db",
+        environment="production",
+        severity="medium",
+        status="open",
+        symptoms="Demo symptoms",
+        is_demo=True,
+        created_at=datetime.now(timezone.utc)
+    )
+    memory_db.add(demo_inc)
+    memory_db.commit()
+
+    summary_demo_only = service.get_summary(memory_db)
+    assert summary_demo_only.memory_impact.recall_hit_rate is None
+    assert summary_demo_only.memory_impact.recall_hit_rate_note == "No live memory analyses recorded yet"
+
+

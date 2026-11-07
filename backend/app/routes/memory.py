@@ -56,6 +56,9 @@ def get_memory_stats(db: Session = Depends(get_db)):
     return {
         "source": "database",
         "bank_id": hindsight_service.bank_id,
+        "total_documents": retained_count,
+        "total_nodes": 0,
+        "total_observations": 0,
         "total_retained_resolutions": retained_count,
         "total_incidents": total_incidents,
         "message": "Hindsight API unavailable or unconfigured; counts reported from local database."
