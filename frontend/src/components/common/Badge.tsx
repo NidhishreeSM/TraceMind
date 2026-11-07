@@ -1,52 +1,29 @@
 import React from 'react';
 import { Severity, Status, Environment } from '../../types';
-import { ShieldAlert, AlertTriangle, AlertCircle, Info, CheckCircle2, Clock, Activity } from 'lucide-react';
 
 interface SeverityBadgeProps {
   severity: Severity;
   className?: string;
-  showIcon?: boolean;
 }
 
 export const SeverityBadge: React.FC<SeverityBadgeProps> = ({
   severity,
   className = '',
-  showIcon = true,
 }) => {
-  const styles: Record<Severity, { bg: string; text: string; border: string; icon: React.ReactNode }> = {
-    critical: {
-      bg: 'bg-rose-950/70',
-      text: 'text-rose-300',
-      border: 'border-rose-500/50',
-      icon: <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />,
-    },
-    high: {
-      bg: 'bg-orange-950/70',
-      text: 'text-orange-300',
-      border: 'border-orange-500/50',
-      icon: <AlertTriangle className="w-3.5 h-3.5 text-orange-400" />,
-    },
-    medium: {
-      bg: 'bg-amber-950/70',
-      text: 'text-amber-300',
-      border: 'border-amber-500/50',
-      icon: <AlertCircle className="w-3.5 h-3.5 text-amber-400" />,
-    },
-    low: {
-      bg: 'bg-blue-950/70',
-      text: 'text-blue-300',
-      border: 'border-blue-500/50',
-      icon: <Info className="w-3.5 h-3.5 text-blue-400" />,
-    },
+  // Semantic Colours (text, ~15% bg tint, ~35% border)
+  const styles: Record<Severity, string> = {
+    critical: 'text-[#EF4444] bg-[#EF4444]/15 border border-[#EF4444]/35 font-semibold',
+    high: 'text-[#F97316] bg-[#F97316]/15 border border-[#F97316]/35 font-semibold',
+    medium: 'text-[#EAB308] bg-[#EAB308]/15 border border-[#EAB308]/35 font-semibold',
+    low: 'text-[#94A3B8] bg-[#94A3B8]/15 border border-[#94A3B8]/35 font-semibold',
   };
 
-  const current = styles[severity] || styles.low;
+  const styleClass = styles[severity] || styles.low;
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider border shadow-xs ${current.bg} ${current.text} ${current.border} ${className}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs uppercase tracking-wider ${styleClass} ${className}`}
     >
-      {showIcon && current.icon}
       {severity}
     </span>
   );
@@ -58,37 +35,20 @@ interface StatusBadgeProps {
 }
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = '' }) => {
-  const styles: Record<Status, { bg: string; text: string; border: string; dot: string; icon: React.ReactNode }> = {
-    open: {
-      bg: 'bg-red-950/60',
-      text: 'text-red-300',
-      border: 'border-red-600/40',
-      dot: 'bg-red-400',
-      icon: <Clock className="w-3.5 h-3.5 text-red-400" />,
-    },
-    investigating: {
-      bg: 'bg-sky-950/60',
-      text: 'text-sky-300',
-      border: 'border-sky-500/40',
-      dot: 'bg-sky-400',
-      icon: <Activity className="w-3.5 h-3.5 text-sky-400" />,
-    },
-    resolved: {
-      bg: 'bg-emerald-950/60',
-      text: 'text-emerald-300',
-      border: 'border-emerald-500/40',
-      dot: 'bg-emerald-400',
-      icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />,
-    },
+  // Semantic dot indicators: Open = red, Investigating = blue, Resolved = green
+  const dotStyles: Record<Status, string> = {
+    open: 'bg-[#EF4444]',
+    investigating: 'bg-[#3B82F6]',
+    resolved: 'bg-[#22C55E]',
   };
 
-  const current = styles[status] || styles.open;
+  const dot = dotStyles[status] || dotStyles.open;
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium border capitalize ${current.bg} ${current.text} ${current.border} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-white/[0.07] bg-[#131C31] text-[#F1F5F9] capitalize ${className}`}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${current.dot}`} />
+      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
       {status}
     </span>
   );
@@ -96,10 +56,10 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
 
 export const DemoBadge: React.FC<{ className?: string }> = ({ className = '' }) => (
   <span
-    className={`inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono text-slate-400 bg-slate-800/80 border border-slate-700/60 ${className}`}
+    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono text-[#94A3B8] bg-[#94A3B8]/15 border border-[#94A3B8]/35 ${className}`}
     title="Synthetic benchmark incident"
   >
-    sample
+    Sample data
   </span>
 );
 
@@ -107,32 +67,11 @@ export const EnvironmentBadge: React.FC<{ env: Environment; className?: string }
   env,
   className = '',
 }) => {
-  const styles: Record<Environment, { bg: string; text: string; border: string }> = {
-    production: {
-      bg: 'bg-rose-950/50',
-      text: 'text-rose-300',
-      border: 'border-rose-500/30',
-    },
-    staging: {
-      bg: 'bg-amber-950/50',
-      text: 'text-amber-300',
-      border: 'border-amber-500/30',
-    },
-    development: {
-      bg: 'bg-slate-800/80',
-      text: 'text-slate-300',
-      border: 'border-slate-700',
-    },
-  };
-
-  const current = styles[env] || styles.development;
-
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded font-mono text-[11px] uppercase tracking-wide border ${current.bg} ${current.text} ${current.border} ${className}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono capitalize border border-white/[0.14] text-[#94A3B8] bg-[#131C31] ${className}`}
     >
       {env}
     </span>
   );
 };
-

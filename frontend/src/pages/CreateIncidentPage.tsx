@@ -95,19 +95,19 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200">
       {/* Navigation & Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.07]">
         <div>
           <Link
             to="/incidents"
-            className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 mb-2 transition"
+            className="inline-flex items-center gap-1 text-xs text-[#94A3B8] hover:text-[#F1F5F9] mb-2 transition"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Incidents
           </Link>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight flex items-center gap-2">
-            <AlertOctagon className="w-6 h-6 text-teal-400" />
-            Declare Anomaly / Outage
+          <h2 className="text-xl sm:text-2xl font-normal text-[#F1F5F9] tracking-wide flex items-center gap-2">
+            <AlertOctagon className="w-6 h-6 text-[#F1F5F9]" />
+            Declare Incident
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-[#94A3B8] mt-0.5">
             Register an incident to invoke Groq AI analysis against Hindsight past-resolution memory.
           </p>
         </div>
@@ -116,9 +116,9 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
         <button
           type="button"
           onClick={loadDemoScenario}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-purple-950/70 border border-purple-500/50 hover:bg-purple-900/80 text-purple-200 text-xs font-semibold shadow-md transition cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/[0.30] hover:bg-white/5 text-[#F1F5F9] text-xs font-semibold transition cursor-pointer self-start sm:self-auto"
         >
-          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+          <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
           Autofill Demo Scenario
         </button>
       </div>
@@ -126,12 +126,12 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
       {/* Main Form */}
       <form
         onSubmit={handleSubmit}
-        className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-6"
+        className="p-8 rounded-2xl bg-[#0E1628] border border-white/[0.07] space-y-6"
       >
         {/* Title */}
         <div className="space-y-1.5">
-          <label htmlFor="title" className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-            Incident Title <span className="text-rose-400">*</span>
+          <label htmlFor="title" className="block text-xs font-medium uppercase tracking-wider text-[#F1F5F9]">
+            Incident Title <span className="text-[#EF4444]">*</span>
           </label>
           <input
             id="title"
@@ -139,14 +139,14 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
             placeholder="e.g. Payment API connection pool exhaustion during peak checkout"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className={`w-full px-3.5 py-2.5 bg-slate-950 border rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-hidden transition ${
+            className={`w-full px-4 py-2.5 bg-[#131C31] border rounded-xl text-sm text-[#F1F5F9] placeholder-[#94A3B8]/60 focus:outline-hidden transition ${
               formErrors.title
-                ? 'border-rose-500 focus:border-rose-400'
-                : 'border-slate-800 focus:border-teal-500'
+                ? 'border-[#EF4444] focus:border-[#EF4444]'
+                : 'border-white/[0.07] focus:border-[#3B82F6]'
             }`}
           />
           {formErrors.title && (
-            <p className="text-xs text-rose-400 mt-1">{formErrors.title}</p>
+            <p className="text-xs text-[#EF4444] mt-1">{formErrors.title}</p>
           )}
         </div>
 
@@ -154,21 +154,21 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Affected Service */}
           <div className="space-y-1.5">
-            <label htmlFor="service" className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-              Affected Service <span className="text-rose-400">*</span>
+            <label htmlFor="service" className="block text-xs font-medium uppercase tracking-wider text-[#F1F5F9]">
+              Affected Service <span className="text-[#EF4444]">*</span>
             </label>
             <div className="relative">
-              <Server className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Server className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
               <input
                 id="service"
                 type="text"
                 placeholder="e.g. payment-api"
                 value={service}
                 onChange={(e) => setService(e.target.value)}
-                className={`w-full pl-9 pr-3.5 py-2.5 bg-slate-950 border rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-hidden font-mono transition ${
+                className={`w-full pl-10 pr-3.5 py-2.5 bg-[#131C31] border rounded-xl text-sm text-[#F1F5F9] placeholder-[#94A3B8]/60 focus:outline-hidden font-mono transition ${
                   formErrors.service
-                    ? 'border-rose-500 focus:border-rose-400'
-                    : 'border-slate-800 focus:border-teal-500'
+                    ? 'border-[#EF4444] focus:border-[#EF4444]'
+                    : 'border-white/[0.07] focus:border-[#3B82F6]'
                 }`}
               />
             </div>
@@ -179,20 +179,20 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
                   key={s}
                   type="button"
                   onClick={() => setService(s)}
-                  className="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition"
+                  className="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-[#131C31] border border-white/[0.07] text-[#94A3B8] hover:text-[#F1F5F9] transition cursor-pointer"
                 >
                   {s}
                 </button>
               ))}
             </div>
             {formErrors.service && (
-              <p className="text-xs text-rose-400 mt-1">{formErrors.service}</p>
+              <p className="text-xs text-[#EF4444] mt-1">{formErrors.service}</p>
             )}
           </div>
 
           {/* Environment */}
           <div className="space-y-1.5">
-            <label htmlFor="environment" className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+            <label htmlFor="environment" className="block text-xs font-medium uppercase tracking-wider text-[#F1F5F9]">
               Deployment Environment
             </label>
             <div className="relative">
@@ -200,13 +200,13 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
                 id="environment"
                 value={environment}
                 onChange={(e) => setEnvironment(e.target.value as Environment)}
-                className="w-full appearance-none px-3.5 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-hidden focus:border-teal-500 transition cursor-pointer"
+                className="w-full appearance-none px-4 pr-10 py-2.5 bg-[#131C31] border border-white/[0.07] rounded-xl text-sm text-[#F1F5F9] focus:outline-hidden focus:border-[#3B82F6] transition cursor-pointer"
               >
-                <option value="production" className="bg-slate-950 text-slate-200">Production (Live Traffic)</option>
-                <option value="staging" className="bg-slate-950 text-slate-200">Staging (Pre-Release)</option>
-                <option value="development" className="bg-slate-950 text-slate-200">Development / Sandbox</option>
+                <option value="production" className="bg-[#0E1628] text-[#F1F5F9]">Production (Live Traffic)</option>
+                <option value="staging" className="bg-[#0E1628] text-[#F1F5F9]">Staging (Pre-Release)</option>
+                <option value="development" className="bg-[#0E1628] text-[#F1F5F9]">Development / Sandbox</option>
               </select>
-              <ChevronDown className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <ChevronDown className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none" />
             </div>
           </div>
         </div>
@@ -214,20 +214,36 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
         {/* Severity Selector */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-              Severity Level <span className="text-rose-400">*</span>
+            <label className="block text-xs font-medium uppercase tracking-wider text-[#F1F5F9]">
+              Severity Level <span className="text-[#EF4444]">*</span>
             </label>
             {!severity && (
-              <span className="text-[11px] text-slate-400 font-mono">Please select one</span>
+              <span className="text-[11px] text-[#94A3B8] font-mono">Please select one</span>
             )}
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { level: 'critical', desc: 'Customer outage / Revenue risk', border: 'border-rose-500', activeBg: 'bg-rose-950/60 text-rose-200' },
-              { level: 'high', desc: 'Severe degradation', border: 'border-orange-500', activeBg: 'bg-orange-950/60 text-orange-200' },
-              { level: 'medium', desc: 'Partial impairment', border: 'border-amber-500', activeBg: 'bg-amber-950/60 text-amber-200' },
-              { level: 'low', desc: 'Minor anomaly / Glitch', border: 'border-blue-500', activeBg: 'bg-blue-950/60 text-blue-200' },
-            ].map(({ level, desc, border, activeBg }) => (
+              {
+                level: 'critical',
+                desc: 'Customer outage / Revenue risk',
+                activeClass: 'bg-[#EF4444]/20 text-[#EF4444] border-[#EF4444] font-bold',
+              },
+              {
+                level: 'high',
+                desc: 'Severe degradation',
+                activeClass: 'bg-[#F97316]/20 text-[#F97316] border-[#F97316] font-bold',
+              },
+              {
+                level: 'medium',
+                desc: 'Partial impairment',
+                activeClass: 'bg-[#EAB308]/20 text-[#EAB308] border-[#EAB308] font-bold',
+              },
+              {
+                level: 'low',
+                desc: 'Minor anomaly / Glitch',
+                activeClass: 'bg-[#94A3B8]/20 text-[#94A3B8] border-[#94A3B8] font-bold',
+              },
+            ].map(({ level, desc, activeClass }) => (
               <button
                 key={level}
                 type="button"
@@ -241,28 +257,28 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
                     });
                   }
                 }}
-                className={`p-3 rounded-xl border text-left transition cursor-pointer ${
+                className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${
                   severity === level
-                    ? `${border} ${activeBg} shadow-md ring-1 ring-teal-500/30`
+                    ? activeClass
                     : formErrors.severity
-                    ? 'border-rose-500/60 bg-slate-950/60 text-slate-400 hover:border-slate-700'
-                    : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:border-slate-700'
+                    ? 'border-[#EF4444]/60 bg-[#131C31] text-[#94A3B8] hover:border-white/[0.20]'
+                    : 'border-white/[0.07] bg-[#131C31] text-[#94A3B8] hover:text-[#F1F5F9] hover:border-white/[0.20]'
                 }`}
               >
-                <div className="text-xs font-bold uppercase tracking-wider">{level}</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">{desc}</div>
+                <div className="text-xs uppercase tracking-wider font-mono">{level}</div>
+                <div className="text-[11px] opacity-80 mt-1">{desc}</div>
               </button>
             ))}
           </div>
           {formErrors.severity && (
-            <p className="text-xs text-rose-400 mt-1">{formErrors.severity}</p>
+            <p className="text-xs text-[#EF4444] mt-1">{formErrors.severity}</p>
           )}
         </div>
 
         {/* Symptoms */}
         <div className="space-y-1.5">
-          <label htmlFor="symptoms" className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-            Observed Symptoms & Impact <span className="text-rose-400">*</span>
+          <label htmlFor="symptoms" className="block text-xs font-medium uppercase tracking-wider text-[#F1F5F9]">
+            Observed Symptoms & Impact <span className="text-[#EF4444]">*</span>
           </label>
           <textarea
             id="symptoms"
@@ -270,25 +286,25 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
             placeholder="Describe what users are experiencing (e.g. HTTP 504 timeouts on checkout, high DB pool latency)"
             value={symptoms}
             onChange={(e) => setSymptoms(e.target.value)}
-            className={`w-full px-3.5 py-2.5 bg-slate-950 border rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-hidden transition ${
+            className={`w-full px-4 py-2.5 bg-[#131C31] border rounded-xl text-sm text-[#F1F5F9] placeholder-[#94A3B8]/60 focus:outline-hidden transition ${
               formErrors.symptoms
-                ? 'border-rose-500 focus:border-rose-400'
-                : 'border-slate-800 focus:border-teal-500'
+                ? 'border-[#EF4444] focus:border-[#EF4444]'
+                : 'border-white/[0.07] focus:border-[#3B82F6]'
             }`}
           />
           {formErrors.symptoms && (
-            <p className="text-xs text-rose-400 mt-1">{formErrors.symptoms}</p>
+            <p className="text-xs text-[#EF4444] mt-1">{formErrors.symptoms}</p>
           )}
         </div>
 
         {/* Error Logs */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label htmlFor="errorLogs" className="block text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-              <Terminal className="w-3.5 h-3.5 text-teal-400" />
-              Raw Error Logs / Stack Traces <span className="text-rose-400">*</span>
+            <label htmlFor="errorLogs" className="block text-xs font-medium uppercase tracking-wider text-[#F1F5F9] flex items-center gap-1.5">
+              <Terminal className="w-3.5 h-3.5 text-[#3B82F6]" />
+              Raw Error Logs / Stack Traces <span className="text-[#EF4444]">*</span>
             </label>
-            <span className="text-[11px] text-slate-400 font-mono">Monospace Terminal View</span>
+            <span className="text-[11px] text-[#94A3B8] font-mono">Monospace Terminal View</span>
           </div>
           <textarea
             id="errorLogs"
@@ -296,23 +312,23 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
             placeholder="Paste log output, exception traces, or HTTP response dumps..."
             value={errorLogs}
             onChange={(e) => setErrorLogs(e.target.value)}
-            className={`w-full p-3.5 bg-slate-950 border rounded-xl font-mono text-xs text-teal-300/90 placeholder-slate-600 focus:outline-hidden leading-relaxed transition ${
+            className={`w-full p-4 bg-[#131C31] border rounded-xl font-mono text-xs text-[#94A3B8] placeholder-[#94A3B8]/50 focus:outline-hidden leading-relaxed transition ${
               formErrors.errorLogs
-                ? 'border-rose-500 focus:border-rose-400'
-                : 'border-slate-800 focus:border-teal-500'
+                ? 'border-[#EF4444] focus:border-[#EF4444]'
+                : 'border-white/[0.07] focus:border-[#3B82F6]'
             }`}
             spellCheck={false}
           />
           {formErrors.errorLogs && (
-            <p className="text-xs text-rose-400 mt-1">{formErrors.errorLogs}</p>
+            <p className="text-xs text-[#EF4444] mt-1">{formErrors.errorLogs}</p>
           )}
         </div>
 
         {/* Form Actions */}
-        <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+        <div className="pt-4 border-t border-white/[0.07] flex items-center justify-between">
           <Link
             to="/incidents"
-            className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition"
+            className="px-4 py-2 text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] transition"
           >
             Cancel
           </Link>
@@ -320,13 +336,13 @@ WARNING: 64 checkout worker threads in WAIT state waiting for free connection`
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-sm font-bold shadow-xl shadow-teal-950/50 transition cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white hover:bg-[#C9D6EA] text-[#080E1D] text-xs font-semibold transition cursor-pointer disabled:opacity-50"
           >
             {submitting ? (
               <>Submitting & Initializing...</>
             ) : (
               <>
-                <Send className="w-4 h-4" />
+                <Send className="w-3.5 h-3.5" />
                 Declare & Proceed to Triage
               </>
             )}

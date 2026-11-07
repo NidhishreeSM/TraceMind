@@ -1,33 +1,73 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    color-scheme: dark;
-  }
+@theme {
+  --color-bg: #050b1a;
+  --color-surface: #0b1530;
+  --color-surface-raised: #101c3d;
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.16);
+  --color-primary-blue: #3b82f6;
+  --color-deep-blue: #1d4ed8;
+  --color-silver: #c9d6ea;
+  --color-muted: #8fa0bf;
+  --color-text-main: #ffffff;
 
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: #0b0f17;
-    color: #f1f5f9;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+  /* Console-only surface & semantic tokens */
+  --color-console-bg: #080e1d;
+  --color-console-sidebar: #0a1122;
+  --color-console-surface: #0e1628;
+  --color-console-surface-raised: #131c31;
+  --color-console-border: rgba(255, 255, 255, 0.07);
+  --color-console-border-hover: rgba(255, 255, 255, 0.14);
+  --color-console-text-primary: #f1f5f9;
+  --color-console-text-secondary: #94a3b8;
+  --color-console-text-disabled: #64748b;
 
-  /* Custom scrollbar for ops console feel */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #0f172a;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
-  }
+  --color-sem-success: #22c55e;
+  --color-sem-danger: #ef4444;
+  --color-sem-high: #f97316;
+  --color-sem-warning: #eab308;
+  --color-sem-memory: #8b5cf6;
+  --color-sem-info: #3b82f6;
+  --color-sem-muted: #94a3b8;
+}
+
+:root {
+  color-scheme: dark;
+  --console-bg: #080e1d;
+  --console-sidebar: #0a1122;
+  --console-surface: #0e1628;
+  --console-surface-raised: #131c31;
+  --console-border: rgba(255, 255, 255, 0.07);
+  --console-border-hover: rgba(255, 255, 255, 0.14);
+  --console-text-primary: #f1f5f9;
+  --console-text-secondary: #94a3b8;
+  --console-text-disabled: #64748b;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #050b1a;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar matching console surface */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080e1d;
+}
+::-webkit-scrollbar-thumb {
+  background: #131c31;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #1e293b;
 }

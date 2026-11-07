@@ -16,9 +16,11 @@ export const App: React.FC = () => {
     <ToastProvider>
       <BrowserRouter>
         <Routes>
-          {/* Main App Layout */}
+          {/* Public Landing Page (Renders independently without Sidebar or Console TopBar) */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Console Application Shell (Sidebar + Console TopBar) */}
           <Route element={<AppShell />}>
-            <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/incidents" element={<IncidentsListPage />} />
             <Route path="/incidents/new" element={<CreateIncidentPage />} />
