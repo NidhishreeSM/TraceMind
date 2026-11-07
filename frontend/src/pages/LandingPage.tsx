@@ -9,10 +9,17 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { Logo } from '../components/common/Logo';
+import themeBg from '../assets/theme-bg.webp';
 
 export const LandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-[#050B1A] text-white flex flex-col font-sans selection:bg-[#3B82F6]/30 selection:text-white">
+    <div
+      className="min-h-screen bg-[#050B1A] text-white flex flex-col font-sans selection:bg-[#3B82F6]/30 selection:text-white relative bg-fixed bg-cover"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, rgba(5, 11, 26, 0.3) 0%, rgba(5, 11, 26, 0.75) 40%, rgba(5, 11, 26, 0.95) 80%, #050B1A 100%), url(${themeBg})`,
+        backgroundPosition: 'center top',
+      }}
+    >
       {/* Minimal Top Bar */}
       <header className="sticky top-0 z-50 border-b border-white/8 bg-[#050B1A]/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -50,15 +57,16 @@ export const LandingPage: React.FC = () => {
       {/* Hero Section */}
       <main className="flex-1 flex flex-col">
         <section className="relative overflow-hidden pt-20 pb-24 md:pt-28 md:pb-32 px-6">
-          {/* Soft blue radial glow + silver light streak */}
+          {/* Exact background from reference image */}
           <div
-            className="pointer-events-none absolute inset-0 -z-10"
+            className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-no-repeat opacity-95"
             style={{
-              background:
-                'radial-gradient(circle at 50% 25%, rgba(29, 78, 216, 0.28) 0%, rgba(11, 21, 48, 0.15) 45%, rgba(5, 11, 26, 0) 75%)',
+              backgroundImage: `url(${themeBg})`,
+              backgroundPosition: 'center top',
             }}
           />
-          <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-4/5 max-w-5xl h-px bg-gradient-to-r from-transparent via-[#C9D6EA]/40 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-[#050B1A]/20 to-[#050B1A]" />
+          <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-4/5 max-w-5xl h-px bg-gradient-to-r from-transparent via-[#C9D6EA]/50 to-transparent" />
 
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-[#0B1530]/60 text-[#C9D6EA] text-[11px] tracking-widest uppercase font-medium">

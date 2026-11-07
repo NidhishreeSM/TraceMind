@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
+import themeBg from '../../assets/theme-bg.webp';
 
 export const AppShell: React.FC = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -29,7 +30,13 @@ export const AppShell: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         <TopBar onToggleSidebar={() => setMobileSidebarOpen((prev) => !prev)} />
-        <main className="flex-1 overflow-y-auto bg-[#050B1A] p-4 sm:p-6 lg:p-8">
+        <main
+          className="flex-1 overflow-y-auto bg-[#050B1A] p-4 sm:p-6 lg:p-8 bg-cover bg-fixed bg-no-repeat"
+          style={{
+            backgroundImage: `radial-gradient(circle at 85% 15%, rgba(5, 11, 26, 0.72) 0%, rgba(5, 11, 26, 0.94) 80%, #050B1A 100%), url(${themeBg})`,
+            backgroundPosition: 'top right',
+          }}
+        >
           <Outlet />
         </main>
       </div>
