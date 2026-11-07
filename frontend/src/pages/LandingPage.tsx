@@ -25,9 +25,6 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Logo size="md" />
-            <span className="text-base font-medium tracking-wider text-white uppercase">
-              TraceMind
-            </span>
           </div>
 
           <nav className="hidden sm:flex items-center gap-8">
