@@ -1,6 +1,6 @@
 import React from 'react';
 import { Severity, Status, Environment } from '../../types';
-import { ShieldAlert, AlertTriangle, AlertCircle, Info, CheckCircle2, Clock, Activity, Sparkles } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, AlertCircle, Info, CheckCircle2, Clock, Activity } from 'lucide-react';
 
 interface SeverityBadgeProps {
   severity: Severity;
